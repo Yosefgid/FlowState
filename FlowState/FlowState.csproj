@@ -10,6 +10,7 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+<<<<<<< HEAD
   <ItemGroup>
     <Folder Include="Controllers\" />
     <Folder Include="Models\" />
@@ -17,4 +18,6 @@
     <Folder Include="Services\" />
   </ItemGroup>
 
+=======
+>>>>>>> f64bed5f034905caacfa7dbb53ca29028813399c
 </Project>
