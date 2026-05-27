@@ -9,6 +9,7 @@ namespace FlowState
     {
         
         public DbSet<ToDoTask> Tasks { get; set; }
+        public DbSet<User> Users { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options)
         : base(options)
