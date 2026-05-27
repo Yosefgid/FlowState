@@ -9,6 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\FlowState.Blazer.Client\FlowState.Blazer.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.24" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.16" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="9.0.16" />
   </ItemGroup>
 
 </Project>
