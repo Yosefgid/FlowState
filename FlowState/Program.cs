@@ -9,8 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<ToDoTaskService>();
-builder.Services.AddScoped<ToDoTaskRepo>();
+builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
+builder.Services.AddScoped<IToDoTaskRepo, ToDoTaskRepo>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

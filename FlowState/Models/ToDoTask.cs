@@ -19,9 +19,8 @@ namespace FlowState.Models
         
         public string? GoogleId { get; set; }
 
-        public ToDoTask(int id, string name, string description, string googleId)
-        {
-            Id = id;
+        public ToDoTask( string name, string description, string googleId)
+        {         
             Name = name;
             Description = description;
             IsCompleted = false;
