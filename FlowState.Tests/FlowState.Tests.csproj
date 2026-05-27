@@ -30,6 +30,8 @@
 
   <ItemGroup>
     <Folder Include="FlowState.Repo\" />
+    <Folder Include="FlowState.Ctrl\" />
+    <Folder Include="FlowState.Serv\" />
   </ItemGroup>
 
 </Project>
