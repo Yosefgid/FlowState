@@ -2,11 +2,11 @@
 using FlowState.Models;
 namespace FlowState.Repositories
 {
-    public class TaskRepo
+    public class ToDoTaskRepo
     {
         private MyDbContext _dbContext;
 
-        public TaskRepo(MyDbContext context)
+        public ToDoTaskRepo(MyDbContext context)
         {
             _dbContext = context;   
         }

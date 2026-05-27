@@ -5,10 +5,10 @@ namespace FlowState.Controllers
 {
     [Route("api/tasks")]
     [ApiController]
-    public class TaskController : Controller
+    public class ToDoTaskController : Controller
     {
-        private readonly TaskService _taskService;
-        public TaskController(TaskService TaskService) 
+        private readonly ToDoTaskService _taskService;
+        public ToDoTaskController(ToDoTaskService TaskService) 
         { 
             _taskService = TaskService;
         }

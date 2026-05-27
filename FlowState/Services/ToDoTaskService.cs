@@ -3,12 +3,12 @@ using FlowState.Repositories;
 
 namespace FlowState.Services
 {
-    public class TaskService
+    public class ToDoTaskService
     {
 
-        private readonly TaskRepo _taskRepo;
+        private readonly ToDoTaskRepo _taskRepo;
 
-        public TaskService(TaskRepo repo)
+        public ToDoTaskService(ToDoTaskRepo repo)
         {
             _taskRepo = repo;
         }
