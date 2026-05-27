@@ -29,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="FlowState.Ctrl\" />
     <Folder Include="FlowState.Repo\" />
   </ItemGroup>
 
