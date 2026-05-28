@@ -1,0 +1,28 @@
+﻿@code {
+    [Parameter] public string Title   { get; set; } = "";
+    [Parameter] public string Value   { get; set; } = "";
+    [Parameter] public string Change  { get; set; } = "";
+    [Parameter] public bool IsPositive{ get; set; } = true;
+    [Parameter] public IconName Icon  { get; set; } = IconName.Star;
+    [Parameter] public string Accent  { get; set; } = "cyan";
+}
+
+<Card Class="stat-card">
+    <CardBody>
+        <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Class="mb-3">
+            <Span Class="stat-title text-uppercase">@Title</Span>
+            <Icon Name="@Icon" Class="stat-icon" />
+        </Div>
+
+        <Heading Size="HeadingSize.Is2" Class="stat-value mb-2">@Value</Heading>
+
+        <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is1">
+            <Icon Name="@(IsPositive ? IconName.ArrowUp : IconName.ArrowDown)"
+                  TextColor="@(IsPositive ? TextColor.Success : TextColor.Danger)" />
+            <Text TextColor="@(IsPositive ? TextColor.Success : TextColor.Danger)"
+                  Class="small">
+                @Change vs last period
+            </Text>
+        </Div>
+    </CardBody>
+</Card>

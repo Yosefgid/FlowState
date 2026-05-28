@@ -1,0 +1,50 @@
+﻿@code {
+    private string selectedRange = "This Week";
+    private readonly string[] ranges = { "Today", "This Week", "This Month", "Last 30 Days", "Custom" };
+
+    private void SelectRange(string range) => selectedRange = range;
+}
+
+<Bar Mode="BarMode.Horizontal"
+     ThemeContrast="ThemeContrast.Dark"
+     Class="topbar">
+
+    <BarMenu>
+        <BarStart>
+            <div class="topbar-title-group">
+                <Heading Size="HeadingSize.Is4" class="page-title mb-0">Dashboard</Heading>
+                <Text TextColor="TextColor.Muted" class="page-subtitle">Track your productivity at a glance</Text>
+            </div>
+        </BarStart>
+
+        <BarEnd>
+            <!-- Date Range Dropdown -->
+            <BarItem>
+                <Dropdown>
+                    <DropdownToggle Color="Color.Secondary" Outline>
+                        <Icon Name="IconName.Clock" class="me-2" />
+                        @selectedRange
+                    </DropdownToggle>
+                    <DropdownMenu>
+                        @foreach (var r in ranges)
+                        {
+                            <DropdownItem Active="r == selectedRange"
+                                          Clicked="() => SelectRange(r)">
+                                @r
+                            </DropdownItem>
+                        }
+                    </DropdownMenu>
+                </Dropdown>
+            </BarItem>
+
+            <!-- New Session Button -->
+            <BarItem>
+                <Button Color="Color.Primary" class="ms-2">
+                    <Icon Name="IconName.Add" class="me-1" />
+                    New Session
+                </Button>
+            </BarItem>
+        </BarEnd>
+    </BarMenu>
+
+</Bar>
