@@ -146,12 +146,12 @@ public class UserRepoTests
     [Test]
     public void UpdateUser_ReturnsUpdatedUser_WhenUserExists()
     {
-        var updated = new User { Username = "alice_updated", Email = "updated@example.com", PasswordHash = "newhash" };
+        var updated = new User {Email = "updated@example.com", PasswordHash = "newhash" };
 
         var result = _repo.UpdateUser(1, updated);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Username, Is.EqualTo("alice_updated"));
+        Assert.That(result!.Username, Is.EqualTo("alice"));
         Assert.That(result.Email, Is.EqualTo("updated@example.com"));
     }
 

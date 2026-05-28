@@ -129,13 +129,13 @@ public class UserServicesTests
     [Test]
     public void UpdateUser_ReturnsUpdatedUser_WhenUserExists()
     {
-        var updated = new User { Username = "KarlupMax", Email = "Karlmax1@example.com", PasswordHash = "hash" };
+        var updated = new User {Email = "Karlmax1@example.com", PasswordHash = "hash" };
         _mockRepo.Setup(r => r.UpdateUser(1, updated)).Returns(updated);
 
         var result = _service.UpdateUser(1, updated);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result!.Username, Is.EqualTo("KarlupMax"));
+        Assert.That(result!.Email, Is.EqualTo("Karlmax1@example.com"));
     }
     [Test]
     public void UpdateUser_ReturnsNull_WhenUserDoesNotExist()
