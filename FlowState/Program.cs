@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddScoped<GoogleService>();
+builder.Services.AddScoped<IGoogleToDoTaskRepo, GoogleToDoTaskRepo>();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
 builder.Services.AddScoped<IToDoTaskRepo, ToDoTaskRepo>();
