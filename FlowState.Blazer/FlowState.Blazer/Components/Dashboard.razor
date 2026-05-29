@@ -1,12 +1,17 @@
 ﻿
 @code {
+    // ── Session edit ──────────────────────────────────────────────────────────
+    private string selectedRange = "Session0";
+    private readonly string[] ranges = { "Session0", "Session1", "Session2", "Session3", "Session4" };
+
+    private void SelectRange(string range) => selectedRange = range;
     // ── Stat cards ──────────────────────────────────────────────────────────
     private readonly List<(string Title, string Value, string Change, bool Positive, IconName Icon, string Accent)> Stats = new()
     {
         ("Focus Hours",  "32.5h",   "+12%",   true,  IconName.Clock,      "cyan"),
         ("Tasks Done",   "47",      "+8%",    true,  IconName.CheckSquare,"green"),
         ("Streak",       "14 days", "New PR", true,  IconName.Fire,       "orange"),
-        ("Avg. Score",   "8.4/10",  "-0.3",   false, IconName.Star,       "purple"),
+        ("Today's Tasks",   "8/10",  "-0.3",   false, IconName.Star,       "purple"),
     };
 
     // ── Bar chart data ───────────────────────────────────────────────────────
@@ -38,9 +43,9 @@
     // ── Goals ────────────────────────────────────────────────────────────────
     private readonly List<GoalItem> Goals = new()
     {
-        new("Weekly Focus Hours", 32.5, 40,  "cyan"),
-        new("Tasks Completed",    47,   60,  "green"),
-        new("Reading Pages",      95,   120, "purple"),
+        new("Session0", 32.5, 40,  "cyan"),
+        new("Session1",    47,   60,  "green"),
+        new("Session2",      95,   120, "purple"),
     };
 
     private void ToggleTask(TaskItem t) => t.Done = !t.Done;
@@ -62,6 +67,32 @@
 
 <div class="dashboard">
 
+    <!-- Right: Controls -->
+    <div class="d-flex align-items-center gap-3 mb-3">
+
+        <Dropdown>
+            <DropdownToggle Color="Color.Secondary" Outline>
+                <Icon Name="IconName.Clock" Class="me-2" />
+                @selectedRange
+            </DropdownToggle>
+            <DropdownMenu>
+                @foreach (var r in ranges)
+                {
+                    <DropdownItem Active="r == selectedRange"
+                                  Clicked="() => SelectRange(r)">
+                        @r
+                    </DropdownItem>
+                }
+            </DropdownMenu>
+        </Dropdown>
+
+        <Button Color="Color.Primary">
+            <Icon Name="IconName.Add" Class="me-1" />
+            New Session
+        </Button>
+
+    </div>
+
     <!-- ── STAT CARDS ──────────────────────────────────────────────────────── -->
     <Row Gutter="Gutter.Is4" Class="mb-4">
         @foreach (var s in Stats)
@@ -77,77 +108,77 @@
         }
     </Row>
 
-    <!-- ── MID ROW: Chart + Goals ──────────────────────────────────────────── -->
+    <!-- ── MID ROW Goals ──────────────────────────────────────────── -->
     <Row Gutter="Gutter.Is4" Class="mb-4">
 
         <!-- Weekly Activity Bar Chart -->
-        <Column ColumnSize="ColumnSize.Is8.OnDesktop.Is12.OnMobile">
-            <Card Class="h-100">
+        <Column ColumnSize="ColumnSize.IsFull.OnDesktop.Is12.OnMobile">
+            <Card Class="">
                 <CardHeader>
                     <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
-                        <CardTitle>Weekly Activity</CardTitle>
+                        <CardTitle>Modules</CardTitle>
                         <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
-                            <Span Class="legend-dot cyan me-1"></Span><Text Class="small">Focus</Text>
-                            <Span Class="legend-dot green me-1"></Span><Text Class="small">Tasks</Text>
+                            @*<Span Class="legend-dot cyan me-1"></Span><Text Class="small">Focus</Text>
+                            <Span Class="legend-dot green me-1"></Span><Text Class="small">Tasks</Text>*@
                         </Div>
                     </Div>
                 </CardHeader>
-                <CardBody>
-                    <div class="bar-chart">
-                        @for (int i = 0; i < DayLabels.Length; i++)
-                        {
-                            var fi = i;
-                            <div class="bar-group">
-                                <div class="bars">
-                                    <div class="bar cyan-bar"
-                                         style="height:@(BarHeight(FocusData[fi]))%"
-                                         title="Focus: @FocusData[fi]h"></div>
-                                    <div class="bar green-bar"
-                                         style="height:@(BarHeight(TaskData[fi]))%"
-                                         title="Tasks: @TaskData[fi]"></div>
-                                </div>
-                                <span class="bar-label">@DayLabels[fi]</span>
-                            </div>
-                        }
-                    </div>
+                <CardBody Class="scroll-row">
+                    <Div style=" text-align:center">
+                        <Card Style="flex-shrink:0">
+                            <CardBody Class="module">
+                        
+                        
+                            </CardBody>
+                       
+                        </Card>
+                        <Text >Eisenhower</Text>
+                    </Div>  
+                    
+                    <Div style=" text-align:center">
+                        <Card Style="flex-shrink:0">
+                            <CardBody Class="module">
+
+
+                            </CardBody>
+
+                        </Card>
+                        <Text>Eisenhower</Text>
+                    </Div>
+
+                    <Div style=" text-align:center">
+                        <Card Style="flex-shrink:0">
+                            <CardBody Class="module">
+
+
+                            </CardBody>
+
+                        </Card>
+                        <Text>Eisenhower</Text>
+                    </Div>
+
+                    <Div style=" text-align:center">
+                        <Card Style="flex-shrink:0">
+                            <CardBody Class="module">
+
+
+                            </CardBody>
+
+                        </Card>
+                        <Text>Eisenhower</Text>
+                    </Div>
+
                 </CardBody>
+
             </Card>
         </Column>
 
-        <!-- Goal Progress -->
-        <Column ColumnSize="ColumnSize.Is4.OnDesktop.Is12.OnMobile">
-            <Card Class="h-100">
-                <CardHeader>
-                    <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
-                        <CardTitle>Weekly Goals</CardTitle>
-                        <Anchor To="/goals" Class="card-link">View all →</Anchor>
-                    </Div>
-                </CardHeader>
-                <CardBody>
-                    <Div Flex="Flex.Column" Gap="Gap.Is4">
-                        @foreach (var g in Goals)
-                        {
-                            var pct = (int)Math.Min((g.Current / g.Target) * 100, 100);
-                            <div class="goal-item">
-                                <Div Flex="Flex.JustifyContent.Between" Class="mb-1">
-                                    <Text Class="goal-name">@g.Name</Text>
-                                    <Text TextColor="TextColor.Muted" Class="small">@g.Current / @g.Target</Text>
-                                </Div>
-                                <Progress Class="progress-track ">
-                                    <ProgressBar Value="@pct" />
-                                </Progress>
-                                <Text TextColor="TextColor.Muted" Class="small text-end mt-1">@pct%</Text>
-                            </div>
-                        }
-                    </Div>
-                </CardBody>
-            </Card>
-        </Column>
+       
 
     </Row>
 
     <!-- ── BOTTOM ROW: Tasks + Sessions ────────────────────────────────────── -->
-    <Row Gutter="Gutter.Is4">
+    <Row Gutter="Gutter.Is4" Class="pb-4">
 
         <!-- Task List -->
         <Column ColumnSize="ColumnSize.Is6.OnDesktop.Is12.OnMobile">
@@ -185,32 +216,29 @@
         </Column>
 
         <!-- Sessions -->
-        <Column ColumnSize="ColumnSize.Is6.OnDesktop.Is12.OnMobile">
-            <Card>
+        <Column ColumnSize="ColumnSize.Is5.OnDesktop.Is12.OnMobile">
+            <Card Class=" ms-3">
                 <CardHeader>
                     <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
-                        <CardTitle>Today's Sessions</CardTitle>
-                        <Anchor To="/sessions" Class="card-link">View all →</Anchor>
+                        <CardTitle>Session Tasks Complete Rate</CardTitle>
+                        <Anchor To="/goals" Class="card-link">View all →</Anchor>
                     </Div>
                 </CardHeader>
                 <CardBody>
-                    <Div Flex="Flex.Column" Gap="Gap.Is3">
-                        @foreach (var s in Sessions)
+                    <Div Flex="Flex.Column" Gap="Gap.Is4">
+                        @foreach (var g in Goals)
                         {
-                            <Card Class="session-item border">
-                                <CardBody Class="py-2 px-3">
-                                    <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
-                                        <div class="session-color-bar" style="background:@s.Color"></div>
-                                        <Div Class="flex-grow-1">
-                                            <Text Class="session-name fw-semibold">@s.Name</Text>
-                                            <Text TextColor="TextColor.Muted" Class="small">@s.Start – @s.End</Text>
-                                        </Div>
-                                        <Div Class="session-score" style="color:red">
-                                            @s.Score<span class="score-denom">/10</span>
-                                        </Div>
-                                    </Div>
-                                </CardBody>
-                            </Card>
+                            var pct = (int)Math.Min((g.Current / g.Target) * 100, 100);
+                            <div class="goal-item">
+                                <Div Flex="Flex.JustifyContent.Between" Class="mb-1">
+                                    <Text Class="goal-name">@g.Name</Text>
+                                    <Text TextColor="TextColor.Muted" Class="small">@g.Current / @g.Target</Text>
+                                </Div>
+                                <Progress Class="progress-track ">
+                                    <ProgressBar Value="@pct" />
+                                </Progress>
+                                <Text TextColor="TextColor.Muted" Class="small text-end mt-1">@pct%</Text>
+                            </div>
                         }
                     </Div>
                 </CardBody>

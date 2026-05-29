@@ -1,17 +1,50 @@
 ﻿@inherits Functionality.BaseTodoItems;
+@rendermode InteractiveServer
 @using Functionality;
 
 <Container Fluid>
-    <Row>
-        <Column ColumnSize="ColumnSize.Is12.OnMobile.Is8.OnDesktop">
+    <Column Flex="Flex.NoWrap.Column.AlignItems.Center.JustifyContent.Center">       
+        <Column ColumnSize="ColumnSize.Is12">
+            <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <Div Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
+                        <CardTitle Margin="Margin.Is0">Overview</CardTitle>
+                        @* <Button Color="Color.Secondary" Outline Clicked="() => {}" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                            <Icon Name="IconName.Undo" />
+                            Reset demo
+                        </Button> *@
+                       
+
+                    </Div>
+                </CardHeader>
+                <CardBody>
+                    <Div Flex="Flex.Wrap" Gap="Gap.Is2" Margin="Margin.Is3.FromBottom">
+                        <Badge style="background-color:cornflowerblue" Subtle Pill >Total: @TotalCount</Badge>
+                        <Badge style="background-color:darkorange" Subtle Pill >Active: @ActiveCount</Badge>
+                        <Badge style="background-color:darkgreen" Subtle Pill >Completed: @CompletedCount</Badge>
+                    </Div>
+
+                    <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Margin="Margin.Is2.FromBottom">
+                        <Span TextColor="TextColor.Secondary">Progress</Span>
+                        <Strong>@CompletionPercentage%</Strong>
+                    </Div>
+                    <Progress Color="@GetCompletionColor()" Value="@CompletionPercentage" Margin="Margin.Is4.FromBottom" />
+
+                    <Alert Color="@GetCompletionColor()" Visible Margin="Margin.Is4.FromTop.Is0.FromBottom">
+                        <AlertDescription>@GetSummaryText()</AlertDescription>
+                    </Alert>
+                </CardBody>
+            </Card>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is12">
             <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
                 <CardHeader>
                     <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
                         <CardTitle Margin="Margin.Is0">Task list</CardTitle>
                         <Buttons Role="ButtonsRole.Addons">
-                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter( Filter.All ))" Active="@(filter == Filter.All)">All</Button>
-                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter( Filter.Active ))" Active="@(filter == Filter.Active)">Active</Button>
-                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter( Filter.Completed ))" Active="@(filter == Filter.Completed)">Done</Button>
+                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.All))" Active="@(filter == Filter.All)">All</Button>
+                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.Active))" Active="@(filter == Filter.Active)">Active</Button>
+                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.Completed))" Active="@(filter == Filter.Completed)">Done</Button>
                         </Buttons>
                     </Div>
                 </CardHeader>
@@ -35,7 +68,7 @@
                     </Field>
                 </CardBody>
                 <CardBody Padding="Padding.Is0.OnY">
-                    @if ( FilteredCount == 0 )
+                    @if (FilteredCount == 0)
                     {
                         <Alert Color="Color.Light" Visible Margin="Margin.Is3.OnX.Is3.FromBottom">
                             <AlertMessage>@GetEmptyTitle()</AlertMessage>
@@ -45,7 +78,7 @@
                     else
                     {
                         <ListGroup Flush>
-                            @foreach ( var todo in Todos )
+                            @foreach (var todo in Todos)
                             {
                                 <ToDoItem Todo="@todo" StatusChanged="@OnTodoStatusChanged" RemoveClicked="@OnRemoveTodo" />
                             }
@@ -65,35 +98,18 @@
                 </CardFooter>
             </Card>
         </Column>
-        <Column ColumnSize="ColumnSize.Is12.OnMobile.Is4.OnDesktop">
-            <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
-                <CardHeader>
-                    <Div Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
-                        <CardTitle Margin="Margin.Is0">Overview</CardTitle>
-                        <Button Color="Color.Secondary" Outline Clicked="() => {}" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
-                            <Icon Name="IconName.Undo" />
-                            Reset demo
-                        </Button>
-                    </Div>
-                </CardHeader>
-                <CardBody>
-                    <Div Flex="Flex.Wrap" Gap="Gap.Is2" Margin="Margin.Is3.FromBottom">
-                        <Badge Color="Color.Primary" Subtle Pill>Total: @TotalCount</Badge>
-                        <Badge Color="Color.Info" Subtle Pill>Active: @ActiveCount</Badge>
-                        <Badge Color="Color.Success" Subtle Pill>Completed: @CompletedCount</Badge>
-                    </Div>
-
-                    <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Margin="Margin.Is2.FromBottom">
-                        <Span TextColor="TextColor.Secondary">Progress</Span>
-                        <Strong>@CompletionPercentage%</Strong>
-                    </Div>
-                    <Progress Color="@GetCompletionColor()" Value="@CompletionPercentage" Margin="Margin.Is4.FromBottom" />
-
-                    <Alert Color="@GetCompletionColor()" Visible Margin="Margin.Is4.FromTop.Is0.FromBottom">
-                        <AlertDescription>@GetSummaryText()</AlertDescription>
-                    </Alert>
-                </CardBody>
-            </Card>
-        </Column>
-    </Row>
+    </Column>
 </Container>
+
+@code {
+
+    public HttpClient Http;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Http = new HttpClient();     
+        await CreateTodos(Http);
+       
+    }
+}

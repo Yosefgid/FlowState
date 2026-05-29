@@ -4,7 +4,7 @@ using FlowState.Models;
 
 namespace FlowState.Blazer.Components.Functionality
 {
-    
+
     public abstract class BaseTodoItems : ComponentBase
     {
         protected Validations validations;
@@ -13,13 +13,7 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected Filter filter = Filter.All;
 
-        protected List<ToDoTask> todos = new() {
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
-        };
+        protected List<ToDoTask> todos = new() { };
 
         protected IEnumerable<ToDoTask> Todos
         {
@@ -65,9 +59,10 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected async Task OnAddTodo()
         {
+            Console.WriteLine("clicked");
             if (await validations.ValidateAll())
             {
-                todos.Add(new( "", description?.Trim() , ""));
+                todos.Add(new("", description?.Trim(), ""));
                 description = null;
 
                 await validations.ClearAll();
@@ -162,15 +157,19 @@ namespace FlowState.Blazer.Components.Functionality
             return $"{ActiveCount} active task{(ActiveCount == 1 ? string.Empty : "s")} remaining.";
         }
 
-        //private static List<ToDoTask> CreateTodos()
-        //{
-        //    return new()
-        //{
-        //    new() { Description = "Review the sprint board" },
-        //    new() { Description = "Send onboarding notes" },
-        //    new() { Description = "Prepare release checklist", Completed = true },
-        //    new() { Description = "Schedule team sync" },
-        //};
+        protected async Task CreateTodos(HttpClient Http)
+        {
 
+            try
+            {
+                var response = await Http.GetFromJsonAsync<List<ToDoTask>>("https://localhost:7208/api/tasks");
+                todos = response;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+            
+        }
     }
-    }
+}

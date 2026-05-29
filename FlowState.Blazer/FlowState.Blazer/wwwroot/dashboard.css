@@ -61,7 +61,7 @@ body {
 
 .page-body {
     flex: 1;
-    padding: 24px 28px 40px;
+    padding: 30px 28px 40px;
 }
 
 /* ── SIDEBAR ─────────────────────────────────── */
@@ -180,6 +180,7 @@ body {
 .user-info {
     display: flex;
     flex-direction: column;
+   
 }
 
 .user-name {
@@ -196,13 +197,10 @@ body {
 
 /* ── TOPBAR ──────────────────────────────────── */
 .topbar {
-    display: flex;
     align-items: center;
-    justify-content: space-between;
     padding: 18px 28px;
     border-bottom: 1px solid var(--border);
     background: var(--bg-surface);
-    position: sticky;
     top: 0;
     z-index: 50;
 }
@@ -470,6 +468,7 @@ body {
     .card-link:hover {
         text-decoration: underline;
     }
+
 
 /* ── BAR CHART ───────────────────────────────── */
 .bar-chart {
