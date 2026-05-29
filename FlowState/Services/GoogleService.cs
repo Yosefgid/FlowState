@@ -27,6 +27,7 @@ namespace FlowState.Services
             await _googleCalendarClient.ExchangeCodeForTokensAsync(code, userId);
         }
 
+        //Method that adds tasks to db by calling the AddTask method in the ToDoTaskRepo class
         public async Task<List<ToDoTask>> ImportGoogleCalendarEventsAsync(string userId)
         {
             var googleEvents = await _googleCalendarClient.GetCalendarEventsAsync(userId);
