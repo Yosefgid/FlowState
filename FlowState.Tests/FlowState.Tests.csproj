@@ -31,11 +31,10 @@
   <ItemGroup>
     <Folder Include="FlowState.Repo\" />
     <Folder Include="FlowState.Ctrl\" />
-<<<<<<< HEAD
-=======
     <Folder Include="FlowState.Serv\" />
     <Folder Include="FlowState.Repo\" />
->>>>>>> 91ced03 (Standardise local development ports)
+
+
   </ItemGroup>
 
 </Project>
