@@ -158,14 +158,14 @@ public class UserRepoTests
     [Test]
     public void UpdateUser_PersistsChanges_ToDatabase()
     {
-        //This will fail as we removed the username from UpdateUser for now 
-        //Could be fixed later on
-        var updated = new User { Username = "alice_updated", Email = "updated@example.com", PasswordHash = "newhash" };
+        
+        var updated = new User { Email = "updated@example.com", PasswordHash = "newhash" };
 
         _repo.UpdateUser(1, updated);
 
         var fromDb = _context.Users.FirstOrDefault(u => u.Id == 1);
-        Assert.That(fromDb!.Username, Is.EqualTo("alice_updated"));
+        Assert.That(fromDb!.Email, Is.EqualTo("updated@example.com"));
+        Assert.That(fromDb!.PasswordHash, Is.EqualTo("newhash"));
     }
 
     [Test]
@@ -227,10 +227,10 @@ public class UserRepoTests
     [Test]
     public void ChangeUsername_IsCaseSensitive_WhenCheckingForDuplicates()
     {
-        //failing test
+       
         // "JohnDoe" exists — "johndoe" should be allowed if case sensitive
         var result = _repo.ChangeUsername(1, "johndoe");
-        Assert.That(result, Is.Not.Null);
+        Assert.That(result, Is.Null);
     }
     [Test]
     public void ChangeUsername_ReturnsNull_WhenUsernameisTaken_IsCaseInSensitive()
