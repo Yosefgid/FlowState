@@ -158,6 +158,8 @@ public class UserRepoTests
     [Test]
     public void UpdateUser_PersistsChanges_ToDatabase()
     {
+        //This will fail as we removed the username from UpdateUser for now 
+        //Could be fixed later on
         var updated = new User { Username = "alice_updated", Email = "updated@example.com", PasswordHash = "newhash" };
 
         _repo.UpdateUser(1, updated);
@@ -225,6 +227,7 @@ public class UserRepoTests
     [Test]
     public void ChangeUsername_IsCaseSensitive_WhenCheckingForDuplicates()
     {
+        //failing test
         // "JohnDoe" exists — "johndoe" should be allowed if case sensitive
         var result = _repo.ChangeUsername(1, "johndoe");
         Assert.That(result, Is.Not.Null);
@@ -232,9 +235,57 @@ public class UserRepoTests
     [Test]
     public void ChangeUsername_ReturnsNull_WhenUsernameisTaken_IsCaseInSensitive()
     {
-        // "JohnDoe" exists — "johndoe" should be allowed if case sensitive
+        // "JohnDoe" exists — "johndoe" should not  be allowed if case sensitive
         var result = _repo.ChangeUsername(1, "johndoe");
         Assert.That(result, Is.Null);
+    }
+
+    // GetUserByEmail
+    [Test]
+    public void GetUserByEmail_ReturnsCorrectUser_WhenEmailExists()
+    {
+        var result = _repo.GetUserByEmail("alice@example.com");
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Username, Is.EqualTo("alice"));
+    }
+
+    [Test]
+    public void GetUserByEmail_ReturnsNull_WhenEmailDoesNotExist()
+    {
+        var result = _repo.GetUserByEmail("nobody@example.com");
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void GetUserByEmail_IsCaseInsensitive()
+    {
+        var result = _repo.GetUserByEmail("ALICE@EXAMPLE.COM");
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Username, Is.EqualTo("alice"));
+    }
+
+    // GetUserByUsername
+    [Test]
+    public void GetUserByUsername_ReturnsCorrectUser_WhenUsernameExists()
+    {
+        var result = _repo.GetUserByUsername("alice");
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Email, Is.EqualTo("alice@example.com"));
+    }
+
+    [Test]
+    public void GetUserByUsername_ReturnsNull_WhenUsernameDoesNotExist()
+    {
+        var result = _repo.GetUserByUsername("nobody");
+        Assert.That(result, Is.Null);
+    }
+
+    [Test]
+    public void GetUserByUsername_IsCaseInsensitive()
+    {
+        var result = _repo.GetUserByUsername("ALICE");
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result!.Email, Is.EqualTo("alice@example.com"));
     }
 
 
