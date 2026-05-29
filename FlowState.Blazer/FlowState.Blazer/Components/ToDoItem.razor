@@ -1,0 +1,41 @@
+﻿
+
+<ListGroupItem>
+    <Div Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
+        <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3">
+            <Check TValue="bool" Value="@Todo.IsCompleted" ValueChanged="@OnCheckedChanged"></Check>
+            <Div>
+                <Text TextDecoration="@(Todo.IsCompleted ? TextDecoration.LineThrough : TextDecoration.Default)" TextColor="@(Todo.IsCompleted ? TextColor.Muted : TextColor.Body)">
+                    @Todo.Description
+                </Text>
+                <Div Margin="Margin.Is1.FromTop">
+                    <Badge Color="@(Todo.IsCompleted ? Color.Success : Color.Info)" Subtle Pill>
+                        @(Todo.IsCompleted ? "Completed" : "Active")
+                    </Badge>
+                </Div>
+            </Div>
+        </Div>
+        <Button Color="Color.Danger" Outline Size="Size.Small" Clicked="@OnRemoveClicked" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+            <Icon Name="IconName.Delete" />
+            Remove
+        </Button>
+    </Div>
+</ListGroupItem>
+
+@code {
+    private async Task OnCheckedChanged( bool isChecked )
+    {
+        Todo.IsCompleted = isChecked;
+
+        await StatusChanged.InvokeAsync( isChecked );
+    }
+
+    private Task OnRemoveClicked()
+        => RemoveClicked.InvokeAsync( Todo );
+
+    [Parameter] public ToDoTask Todo { get; set; }
+
+    [Parameter] public EventCallback<bool> StatusChanged { get; set; }
+
+    [Parameter] public EventCallback<ToDoTask> RemoveClicked { get; set; }
+}
