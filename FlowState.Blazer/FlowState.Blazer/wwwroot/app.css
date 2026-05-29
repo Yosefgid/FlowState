@@ -27,3 +27,19 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.scroll-row {
+    display: flex;
+    gap: 1rem;
+    overflow-x:scroll;
+    padding: 0.5rem;
+    flex-wrap: nowrap;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.module{
+    min-height: 400px;
+    min-width: 600px;
+    flex-shrink:0
+}

@@ -1,0 +1,100 @@
+﻿<Bar Mode="BarMode.VerticalInline"
+     CollapseMode="BarCollapseMode.Small"
+     ThemeContrast="ThemeContrast.Dark"
+     Class="sidebar">
+
+    <BarBrand>
+        <BarItem>
+            <BarLink>
+                <Icon Name="IconName.Bolt" class="me-2 text-cyan" />
+                <span class="logo-text">FlowDesk</span>
+            </BarLink>
+        </BarItem>
+    </BarBrand>
+
+    <BarMenu>
+        <BarStart>
+
+            <!-- MAIN -->
+            <BarLabel>MAIN</BarLabel>
+
+            <BarItem>
+                <BarLink To="/" Match="Match.All">
+                    <BarIcon IconName="IconName.ChartBar" />
+                    Dashboard
+                </BarLink>
+            </BarItem>
+
+            <BarItem>
+                <BarLink To="/list">
+                    <BarIcon IconName="IconName.CheckSquare" />
+                    Tasks
+                </BarLink>
+            </BarItem>
+
+            <BarItem>
+                <BarLink To="/sessions">
+                    <BarIcon IconName="IconName.Clock" />
+                    Sessions
+                </BarLink>
+            </BarItem>
+
+            <BarItem>
+                <BarLink To="/calendar">
+                    <BarIcon IconName="IconName.Calendar" />
+                    Calendar
+                </BarLink>
+            </BarItem>
+
+            
+
+            <!-- ANALYTICS -->
+            <BarLabel>ANALYTICS</BarLabel>
+
+            <BarItem>
+                <BarLink To="/reports">
+                    <BarIcon IconName="IconName.ChartLine" />
+                    Reports
+                </BarLink>
+            </BarItem>
+
+            <BarItem>
+                <BarLink To="/goals">
+                    <BarIcon IconName="IconName.Check" />
+                    Goals
+                </BarLink>
+            </BarItem>
+
+            <BarItem>
+                <BarLink To="/habits">
+                    <BarIcon IconName="IconName.Fire" />
+                    Habits
+                </BarLink>
+            </BarItem>
+
+        </BarStart>
+
+        <BarEnd>
+            <BarItem>
+                <BarLink To="/settings">
+                    <BarIcon IconName="IconName.Bolt" />
+                    Settings
+                </BarLink>
+            </BarItem>
+
+            <!-- User card -->
+            <BarItem>
+                <div class="user-card mt-2">
+                    <Div Class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center avatar-initials">AJ</Div>
+                    <div class="user-info ms-2">
+                        <span class="user-name">Alex Johnson</span>
+                        <span class="user-plan">Pro Plan</span>
+                    </div>
+                </div>
+            </BarItem>
+        </BarEnd>
+    </BarMenu>
+
+</Bar>
+
+

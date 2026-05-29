@@ -1,0 +1,115 @@
+﻿@inherits Functionality.BaseTodoItems;
+@rendermode InteractiveServer
+@using Functionality;
+
+<Container Fluid>
+    <Column Flex="Flex.NoWrap.Column.AlignItems.Center.JustifyContent.Center">       
+        <Column ColumnSize="ColumnSize.Is12">
+            <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <Div Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
+                        <CardTitle Margin="Margin.Is0">Overview</CardTitle>
+                        @* <Button Color="Color.Secondary" Outline Clicked="() => {}" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                            <Icon Name="IconName.Undo" />
+                            Reset demo
+                        </Button> *@
+                       
+
+                    </Div>
+                </CardHeader>
+                <CardBody>
+                    <Div Flex="Flex.Wrap" Gap="Gap.Is2" Margin="Margin.Is3.FromBottom">
+                        <Badge style="background-color:cornflowerblue" Subtle Pill >Total: @TotalCount</Badge>
+                        <Badge style="background-color:darkorange" Subtle Pill >Active: @ActiveCount</Badge>
+                        <Badge style="background-color:darkgreen" Subtle Pill >Completed: @CompletedCount</Badge>
+                    </Div>
+
+                    <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Margin="Margin.Is2.FromBottom">
+                        <Span TextColor="TextColor.Secondary">Progress</Span>
+                        <Strong>@CompletionPercentage%</Strong>
+                    </Div>
+                    <Progress Color="@GetCompletionColor()" Value="@CompletionPercentage" Margin="Margin.Is4.FromBottom" />
+
+                    <Alert Color="@GetCompletionColor()" Visible Margin="Margin.Is4.FromTop.Is0.FromBottom">
+                        <AlertDescription>@GetSummaryText()</AlertDescription>
+                    </Alert>
+                </CardBody>
+            </Card>
+        </Column>
+        <Column ColumnSize="ColumnSize.Is12">
+            <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
+                <CardHeader>
+                    <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
+                        <CardTitle Margin="Margin.Is0">Task list</CardTitle>
+                        <Buttons Role="ButtonsRole.Addons">
+                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.All))" Active="@(filter == Filter.All)">All</Button>
+                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.Active))" Active="@(filter == Filter.Active)">Active</Button>
+                            <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.Completed))" Active="@(filter == Filter.Completed)">Done</Button>
+                        </Buttons>
+                    </Div>
+                </CardHeader>
+                <CardBody>
+                    <Field>
+                        <Addons>
+                            <Addon AddonType="AddonType.Body">
+                                <Validations @ref="validations" Mode="ValidationMode.Manual">
+                                    <Validation Validator="@ValidationRule.IsNotEmpty">
+                                        <TextInput @bind-Value="@description" Placeholder="Add a task"></TextInput>
+                                    </Validation>
+                                </Validations>
+                            </Addon>
+                            <Addon AddonType="AddonType.End">
+                                <Button Color="Color.Primary" Clicked="@OnAddTodo" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                                    <Icon Name="IconName.Add" />
+                                    Add task
+                                </Button>
+                            </Addon>
+                        </Addons>
+                    </Field>
+                </CardBody>
+                <CardBody Padding="Padding.Is0.OnY">
+                    @if (FilteredCount == 0)
+                    {
+                        <Alert Color="Color.Light" Visible Margin="Margin.Is3.OnX.Is3.FromBottom">
+                            <AlertMessage>@GetEmptyTitle()</AlertMessage>
+                            <AlertDescription>@GetEmptyDescription()</AlertDescription>
+                        </Alert>
+                    }
+                    else
+                    {
+                        <ListGroup Flush>
+                            @foreach (var todo in Todos)
+                            {
+                                <ToDoItem Todo="@todo" StatusChanged="@OnTodoStatusChanged" RemoveClicked="@OnRemoveTodo" />
+                            }
+                        </ListGroup>
+                    }
+                </CardBody>
+                <CardFooter>
+                    <Div Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
+                        <Check TValue="bool" Value="@IsAllChecked" ValueChanged="@OnCheckAll" Disabled="@(HasTodos == false)">
+                            Mark all complete
+                        </Check>
+                        <Button Color="Color.Warning" Outline Clicked="@OnClearCompleted" Disabled="@(HasCompletedTodos == false)" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                            <Icon Name="IconName.Delete" />
+                            Clear completed
+                        </Button>
+                    </Div>
+                </CardFooter>
+            </Card>
+        </Column>
+    </Column>
+</Container>
+
+@code {
+
+    public HttpClient Http;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        Http = new HttpClient();     
+        await CreateTodos(Http);
+       
+    }
+}
