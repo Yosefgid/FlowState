@@ -62,3 +62,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
+// Allows Program.cs to be visible to out test project
+//needed by WebApplicationFactory<Program>
+public partial class Program { }
