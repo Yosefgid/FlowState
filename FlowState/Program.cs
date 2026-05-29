@@ -10,8 +10,9 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddScoped<GoogleService>();
-builder.Services.AddScoped<IGoogleToDoTaskRepo, GoogleToDoTaskRepo>();
+builder.Services.AddScoped<IToDoTaskRepo, ToDoTaskRepo>();
+builder.Services.AddScoped<IGoogleService, GoogleService>();
+builder.Services.AddScoped<IGoogleCalendarClient, GoogleCalendarClient>();
 builder.Services.AddControllers();
 builder.Services.AddScoped<IToDoTaskService, ToDoTaskService>();
 builder.Services.AddScoped<IToDoTaskRepo, ToDoTaskRepo>();
