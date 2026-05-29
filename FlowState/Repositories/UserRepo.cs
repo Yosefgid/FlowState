@@ -39,7 +39,6 @@ namespace FlowState.Repositories
         {
             var currUser = GetUserById(id);
             if (currUser == null) return null;
-            currUser.Username = updatedUser.Username;
             currUser.Email = updatedUser.Email;
             currUser.PasswordHash = updatedUser.PasswordHash;
             _context.SaveChanges();
