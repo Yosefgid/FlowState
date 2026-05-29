@@ -59,5 +59,16 @@ namespace FlowState.Repositories
             _context.SaveChanges();
             return user;
         }
+        public User? GetUserByEmail(string email)
+        {
+            return _context.Users.FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
+        }
+
+        public User? GetUserByUsername(string username)
+        {
+            return _context.Users.FirstOrDefault(u => u.Username.ToLower() == username.ToLower());
+        }
+
+
     }
 }
