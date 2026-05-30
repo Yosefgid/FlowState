@@ -40,7 +40,7 @@ namespace FlowState.Blazer.Components.Functionality
 
                 if (!string.IsNullOrWhiteSpace(searchTerm))
                     query = query.Where(q =>
-                        q.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                        q.Description.Contains(searchTerm.Trim(), StringComparison.OrdinalIgnoreCase));
 
                 if (filter == Filter.Active)
                     query = from q in query where !q.IsCompleted select q;
