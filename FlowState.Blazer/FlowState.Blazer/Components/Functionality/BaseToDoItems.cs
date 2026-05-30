@@ -52,6 +52,8 @@ namespace FlowState.Blazer.Components.Functionality
                 return query;
             }
 
+            
+
         }
 
         protected int TotalCount => todos.Count;
@@ -93,7 +95,7 @@ namespace FlowState.Blazer.Components.Functionality
         {
 
             List<ToDoTask> tasks = new List<ToDoTask>();
-            tasks.AddRange(Todos);
+            tasks.AddRange(Todos.Where(x => x.IsCompleted));
 
             todos.RemoveAll(x => x.IsCompleted);
 
