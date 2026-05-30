@@ -89,9 +89,25 @@ namespace FlowState.Blazer.Components.Functionality
             }
         }
 
-        protected void OnClearCompleted()
+        protected async void OnClearCompleted()
         {
+
+            List<ToDoTask> tasks = new List<ToDoTask>();
+            tasks.AddRange(Todos);
+
             todos.RemoveAll(x => x.IsCompleted);
+
+
+            try
+            {
+                await Http.PatchAsJsonAsync($"https://localhost:7208/api/tasks/delete-selected/", tasks);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
             filter = Filter.All;
         }
 

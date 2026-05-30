@@ -20,6 +20,8 @@ namespace FlowState.Services
 
         public void ToggleTasksCompleted(List<ToDoTask> tasks , bool IsDone);
 
+        public void DeleteTasks(List<ToDoTask> tasks);
+
     }
     public class ToDoTaskService : IToDoTaskService
     {
@@ -69,7 +71,13 @@ namespace FlowState.Services
             _taskRepo.ToggleTasksCompleted(tasks, IsDone);
         }
 
-    
+        public void DeleteTasks(List<ToDoTask> tasks)
+        {
+            _taskRepo.DeleteTasks(tasks);
+        }
+
+
+
 
     }
 }

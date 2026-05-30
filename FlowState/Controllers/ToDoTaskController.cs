@@ -92,5 +92,15 @@ namespace FlowState.Controllers
             return Ok();
         }
 
+        [HttpPatch("delete-selected")]
+        public IActionResult DeleteTasks([FromBody] List<ToDoTask> tasks)
+        {
+            _taskService.DeleteTasks(tasks);
+
+            return Ok();
+        }
+
+
+
     }
 }

@@ -17,6 +17,8 @@ namespace FlowState.Repositories
         public ToDoTask? ToggleTaskCompleted(int id);
 
         public void ToggleTasksCompleted(List<ToDoTask> tasks, bool IsDone);
+
+        public void DeleteTasks(List<ToDoTask> tasks);
     }
     public class ToDoTaskRepo : IToDoTaskRepo
     {
@@ -81,6 +83,23 @@ namespace FlowState.Repositories
             return true;
         }
 
+        public void DeleteTasks(List<ToDoTask> tasks)
+        {
+
+            foreach (ToDoTask t in tasks)
+            {
+                var task = _dbContext.Tasks.FirstOrDefault(x => x.Id == t.Id);
+
+                if (task == null)
+                    continue;
+
+                _dbContext.Tasks.Remove(task);
+            }
+
+            _dbContext.SaveChanges();
+
+        }
+
         // Additional Functionality --------------------------
         public ToDoTask? ToggleTaskCompleted(int id)
         {
@@ -115,7 +134,10 @@ namespace FlowState.Repositories
 
             _dbContext.SaveChanges();
 
-        }   
+        }
+
+
+        
 
     }
 }
