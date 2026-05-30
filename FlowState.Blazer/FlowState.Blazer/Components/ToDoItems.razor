@@ -41,6 +41,11 @@
                 <CardHeader>
                     <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
                         <CardTitle Margin="Margin.Is0">Task list</CardTitle>
+                        <Div Style="flex:1; max-width:600px;">
+                            <TextInput @bind-Value="@searchTerm"
+                            @onInput="@(() => StateHasChanged())"
+                            Placeholder="Search tasks..." />
+                        </Div>
                         <Buttons Role="ButtonsRole.Addons">
                             <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.All))" Active="@(filter == Filter.All)">All</Button>
                             <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.Active))" Active="@(filter == Filter.Active)">Active</Button>
@@ -118,7 +123,7 @@
     protected override async Task OnInitializedAsync()
     {
    
-        await CreateTodos();
+        //await CreateTodos();
        
     }
 }

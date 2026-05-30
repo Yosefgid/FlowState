@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Components;
-using Blazorise;
+﻿using Blazorise;
 using FlowState.Models;
+using Microsoft.AspNetCore.Components;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace FlowState.Blazer.Components.Functionality
 {
@@ -19,6 +20,8 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected string description;
 
+        protected string searchTerm = string.Empty;
+
         protected Filter filter = Filter.All;
 
         protected List<ToDoTask> todos = new() { 
@@ -35,14 +38,19 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 var query = from t in todos select t;
 
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                    query = query.Where(q =>
+                        q.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+
                 if (filter == Filter.Active)
                     query = from q in query where !q.IsCompleted select q;
 
                 if (filter == Filter.Completed)
                     query = from q in query where q.IsCompleted select q;
-
+         
                 return query;
             }
+
         }
 
         protected int TotalCount => todos.Count;
@@ -65,6 +73,7 @@ namespace FlowState.Blazer.Components.Functionality
         {
             this.filter = filter;
         }
+
 
         protected void OnCheckAll(bool isChecked)
         {
