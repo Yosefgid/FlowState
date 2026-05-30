@@ -30,6 +30,7 @@ namespace FlowState.Blazer.Components.Functionality
             new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
             new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
             new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+
         };
 
         protected IEnumerable<ToDoTask> Todos
@@ -74,10 +75,24 @@ namespace FlowState.Blazer.Components.Functionality
             this.filter = filter;
         }
 
-
-        protected void OnCheckAll(bool isChecked)
+        protected  async void OnCheckAll(bool isChecked)
         {
             todos.ForEach(x => x.IsCompleted = isChecked);
+
+            try
+            {
+                await Http.PatchAsJsonAsync($"https://localhost:7208/api/tasks/set-all/{isChecked}", Todos.ToList());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        protected void OnClearCompleted()
+        {
+            todos.RemoveAll(x => x.IsCompleted);
+            filter = Filter.All;
         }
 
         protected async Task OnAddTodo()
@@ -103,14 +118,6 @@ namespace FlowState.Blazer.Components.Functionality
                 await descValidations.ClearAll();
 
             }
-        }
-
-        
-
-        protected void OnClearCompleted()
-        {
-            todos.RemoveAll(x => x.IsCompleted);
-            filter = Filter.All;
         }
 
         protected async Task OnRemoveTodo(ToDoTask todo)
