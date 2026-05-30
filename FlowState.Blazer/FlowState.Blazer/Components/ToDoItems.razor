@@ -50,14 +50,25 @@
                 </CardHeader>
                 <CardBody>
                     <Field>
-                        <Addons>
-                            <Addon AddonType="AddonType.Body">
-                                <Validations @ref="validations" Mode="ValidationMode.Manual">
-                                    <Validation Validator="@ValidationRule.IsNotEmpty">
-                                        <TextInput @bind-Value="@description" Placeholder="Add a task"></TextInput>
-                                    </Validation>
-                                </Validations>
-                            </Addon>
+                        <Addons Class="gap-1">
+                            <Div Style="width:30%">
+                                <Addon AddonType="AddonType.Body" >
+                                    <Validations @ref="nameValidations" Mode="ValidationMode.Manual">
+                                        <Validation Validator="@ValidationRule.IsNotEmpty">
+                                            <TextInput @bind-Value="@name" Placeholder="Add Name"></TextInput>
+                                        </Validation>
+                                    </Validations>
+                                </Addon>
+                            </Div>
+                            <Div Style="width:60%">
+                                <Addon AddonType="AddonType.Body">
+                                    <Validations @ref="descValidations" Mode="ValidationMode.Manual">
+                                        <Validation Validator="@ValidationRule.IsNotEmpty">
+                                            <TextInput @bind-Value="@description" Placeholder="Add Description"></TextInput>
+                                        </Validation>
+                                    </Validations>
+                                </Addon>
+                            </Div>
                             <Addon AddonType="AddonType.End">
                                 <Button Color="Color.Primary" Clicked="@OnAddTodo" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
                                     <Icon Name="IconName.Add" />
@@ -103,13 +114,11 @@
 
 @code {
 
-    public HttpClient Http;
-
-
+   
     protected override async Task OnInitializedAsync()
     {
-        Http = new HttpClient();     
-        await CreateTodos(Http);
+   
+        await CreateTodos();
        
     }
 }

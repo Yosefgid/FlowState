@@ -4,6 +4,7 @@ namespace FlowState.Models
 {
     public class ToDoTask
     {
+        public static int IdCount { get; set; } = 0 ; // until connected to acc db service
         [Required]
         public int Id { get; set; }
         [Required]
@@ -19,13 +20,14 @@ namespace FlowState.Models
         
         public string? GoogleId { get; set; }
 
-        public ToDoTask( string name, string description, string googleId)
-        {         
+        public ToDoTask(string name, string description, string googleId)
+        {
             Name = name;
             Description = description;
             IsCompleted = false;
             TimeSet = DateTime.Now;
             GoogleId = googleId;
+            Id = ++IdCount;
         }
 
     }
