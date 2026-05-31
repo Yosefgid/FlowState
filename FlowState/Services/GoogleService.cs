@@ -27,7 +27,6 @@ namespace FlowState.Services
             await _googleCalendarClient.ExchangeCodeForTokensAsync(code, userId);
         }
 
-        //Method that adds tasks to db by calling the AddTask method in the ToDoTaskRepo class
         public async Task<List<ToDoTask>> ImportGoogleCalendarEventsAsync(string userId)
         {
             var googleEvents = await _googleCalendarClient.GetCalendarEventsAsync(userId);
@@ -48,11 +47,31 @@ namespace FlowState.Services
 
         public ToDoTask MapGoogleEventToTask(Event googleEvent)
         {
+            var startDate = GetGoogleEventDateTime(googleEvent.Start);
+            var endDate = GetGoogleEventDateTime(googleEvent.End);
+
             return new ToDoTask(
                 googleEvent.Summary ?? "Untitled Google Event",
                 googleEvent.Description ?? "",
-                googleEvent.Id ?? ""
+                googleEvent.Id ?? "",
+                startDate,
+                endDate
             );
+        }
+
+        private DateTime GetGoogleEventDateTime(EventDateTime eventDateTime)
+        {
+            if (eventDateTime.DateTimeDateTimeOffset.HasValue)
+            {
+                return eventDateTime.DateTimeDateTimeOffset.Value.DateTime;
+            }
+
+            if (!string.IsNullOrWhiteSpace(eventDateTime.Date))
+            {
+                return DateTime.Parse(eventDateTime.Date);
+            }
+
+            return DateTime.Now;
         }
     }
 
