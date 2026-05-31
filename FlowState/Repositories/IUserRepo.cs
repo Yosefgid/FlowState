@@ -10,5 +10,7 @@ namespace FlowState.Repositories
         bool DeleteUser(int id);
         User? UpdateUser(int id, User user);
         User? ChangeUsername(int id, string newUsername);
+        User? GetUserByEmail(string email);
+        User? GetUserByUsername(string username);
     }
 }

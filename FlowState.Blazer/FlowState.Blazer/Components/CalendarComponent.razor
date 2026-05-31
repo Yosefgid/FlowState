@@ -1,0 +1,92 @@
+﻿@using FlowState.Models
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<div class="calendar-container">
+    <div class="calendar-header">
+        <button @onclick="PreviousMonth">‹</button>
+
+        <h2>@currentMonth.ToString("MMMM yyyy")</h2>
+
+        <button @onclick="NextMonth">›</button>
+    </div>
+
+    <div class="calendar-days">
+        <div>Mon</div>
+        <div>Tue</div>
+        <div>Wed</div>
+        <div>Thu</div>
+        <div>Fri</div>
+        <div>Sat</div>
+        <div>Sun</div>
+    </div>
+
+    <div class="calendar-grid">
+        @foreach (var day in CalendarDays)
+        {
+            <div class="calendar-cell @(day.Month != currentMonth.Month ? "other-month" : "")">
+                <div class="day-number">@day.Day</div>
+
+                @foreach (var task in GetTasksForDay(day))
+                {
+                    <div class="calendar-event">
+                        <strong>@task.Name</strong>
+                        <span>@task.StartDate.ToString("HH:mm")</span>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<ToDoTask> tasks = new();
+
+    private DateTime currentMonth = new DateTime(
+        DateTime.Today.Year,
+        DateTime.Today.Month,
+        1
+    );
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await Http.GetFromJsonAsync<List<ToDoTask>>("api/calendar");
+
+        if (result is not null)
+        {
+            tasks = result;
+        }
+    }
+
+    private IEnumerable<DateTime> CalendarDays
+    {
+        get
+        {
+            var firstDayOfMonth = currentMonth;
+            var daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
+
+            var startOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
+            var calendarStart = firstDayOfMonth.AddDays(-startOffset);
+
+            return Enumerable.Range(0, 42)
+                .Select(i => calendarStart.AddDays(i));
+        }
+    }
+
+    private IEnumerable<ToDoTask> GetTasksForDay(DateTime day)
+    {
+        return tasks
+            .Where(t => t.StartDate.Date == day.Date)
+            .OrderBy(t => t.StartDate);
+    }
+
+    private void PreviousMonth()
+    {
+        currentMonth = currentMonth.AddMonths(-1);
+    }
+
+    private void NextMonth()
+    {
+        currentMonth = currentMonth.AddMonths(1);
+    }
+}

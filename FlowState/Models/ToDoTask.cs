@@ -13,12 +13,31 @@ namespace FlowState.Models
         public string Description { get; set; }
 
         public bool IsCompleted { get; set; }
-        
+
+        public static int IdCount { get; set; } = 0; // until connected to acc db service at the top
+
         public DateTime? TimeCompleted { get; set; }
         [Required]
         public DateTime TimeSet { get; set; }
-        
+
+        public DateTime StartDate { get; set; }
+
+        public DateTime EndDate { get; set; }
+
         public string? GoogleId { get; set; }
+
+      
+        public ToDoTask( string name, string description, string googleId, DateTime startDate, DateTime endDate)
+        {         
+            Name = name;
+            Description = description;
+            IsCompleted = false;
+            TimeSet = DateTime.Now;
+            GoogleId = googleId;
+            Id = ++IdCount;
+            StartDate = startDate;
+            EndDate = endDate;
+        }
 
         public ToDoTask(string name, string description, string googleId)
         {
