@@ -1,0 +1,414 @@
+@using Functionality;
+@inherits BaseEisenhowerMatrix
+@page "/eisen"
+
+<div class="eisenhower-matrix">
+
+    <!-- Header -->
+    <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Class="mb-3">
+        @* <Div>
+            <Heading Size="HeadingSize.Is5" Class="mb-0">Eisenhower Matrix</Heading>
+            <Text TextColor="TextColor.Muted" Class="small">Drag tasks between quadrants to reprioritise</Text>
+        </Div> *@
+        <Badge Color="Color.Secondary">@AllTasks.Count task@(AllTasks.Count == 1 ? "" : "s")</Badge>
+    </Div>
+
+    <!-- Axis Labels -->
+    <Div Class="matrix-axis-wrapper">
+
+        <!-- Y-axis label -->
+        <div class="axis-label axis-y">
+            <span>URGENT</span>
+        </div>
+
+        <!-- Grid -->
+        <div class="matrix-grid">
+
+            <!-- Column headers -->
+            <div class="matrix-col-header" style="grid-column:2">
+                <span class="axis-chip important">⚡ Important</span>
+            </div>
+            <div class="matrix-col-header" style="grid-column:3">
+                <span class="axis-chip not-important">Not Important</span>
+            </div>
+
+            <!-- Row header: Urgent -->
+            <div class="matrix-row-header" style="grid-row:2">
+                <span class="axis-chip urgent">🔥 Urgent</span>
+            </div>
+
+            <!-- Q1: Do First -->
+            <div class="quadrant q1 @(dragOverQuadrant == Quadrant.DoFirst ? "drag-over" : "")"
+                 style="grid-column:2;grid-row:2"
+                 ondragover="event.preventDefault()"
+                 @ondragover:preventDefault
+                 @ondrop="() => OnDrop(Quadrant.DoFirst)"
+                 @ondragenter="() => dragOverQuadrant = Quadrant.DoFirst"
+                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.DoFirst) dragOverQuadrant = null; }">
+                <div class="quadrant-header">
+                    <span class="q-label">DO FIRST</span>
+                    <Badge style="color:red" Pill>@TasksFor(Quadrant.DoFirst).Count</Badge>
+                </div>
+                <div class="task-list">
+                    @foreach (var task in TasksFor(Quadrant.DoFirst))
+                    {
+                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
+                             draggable="true"
+                             @ondragstart="() => OnDragStart(task)"
+                             @ondragend="OnDragEnd">
+                            <div class="task-card-inner">
+                                <Check TValue="bool"
+                                       Checked="@task.IsCompleted"
+                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
+                                       Class="task-check" />
+                                <div class="task-text">
+                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
+                                    @if (!string.IsNullOrWhiteSpace(task.Description))
+                                    {
+                                        <span class="task-desc">@task.Description</span>
+                                    }
+                                </div>
+                                <span class="drag-handle">⠿</span>
+                            </div>
+                        </div>
+                    }
+                    @if (!TasksFor(Quadrant.DoFirst).Any())
+                    {
+                        <div class="empty-hint">Drop tasks here</div>
+                    }
+                </div>
+            </div>
+
+            <!-- Q2: Schedule -->
+            <div class="quadrant q2 @(dragOverQuadrant == Quadrant.Schedule ? "drag-over" : "")"
+                 style="grid-column:3;grid-row:2"
+                 ondragover="event.preventDefault()"
+                 @ondragover:preventDefault
+                 @ondrop="() => OnDrop(Quadrant.Schedule)"
+                 @ondragenter="() => dragOverQuadrant = Quadrant.Schedule"
+                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.Schedule) dragOverQuadrant = null; }">
+                <div class="quadrant-header">
+                    <span class="q-label">SCHEDULE</span>
+                    <Badge style="color:royalblue" Pill>@TasksFor(Quadrant.Schedule).Count</Badge>
+                </div>
+                <div class="task-list">
+                    @foreach (var task in TasksFor(Quadrant.Schedule))
+                    {
+                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
+                             draggable="true"
+                             @ondragstart="() => OnDragStart(task)"
+                             @ondragend="OnDragEnd">
+                            <div class="task-card-inner">
+                                <Check TValue="bool"
+                                       Checked="@task.IsCompleted"
+                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
+                                       Class="task-check" />
+                                <div class="task-text">
+                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
+                                    @if (!string.IsNullOrWhiteSpace(task.Description))
+                                    {
+                                        <span class="task-desc">@task.Description</span>
+                                    }
+                                </div>
+                                <span class="drag-handle">⠿</span>
+                            </div>
+                        </div>
+                    }
+                    @if (!TasksFor(Quadrant.Schedule).Any())
+                    {
+                        <div class="empty-hint">Drop tasks here</div>
+                    }
+                </div>
+            </div>
+
+            <!-- Row header: Not Urgent -->
+            <div class="matrix-row-header" style="grid-row:3">
+                <span class="axis-chip not-urgent">Not Urgent</span>
+            </div>
+
+            <!-- Q3: Delegate -->
+            <div class="quadrant q3 @(dragOverQuadrant == Quadrant.Delegate ? "drag-over" : "")"
+                 style="grid-column:2;grid-row:3"
+                 ondragover="event.preventDefault()"
+                 @ondragover:preventDefault
+                 @ondrop="() => OnDrop(Quadrant.Delegate)"
+                 @ondragenter="() => dragOverQuadrant = Quadrant.Delegate"
+                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.Delegate) dragOverQuadrant = null; }">
+                <div class="quadrant-header">
+                    <span class="q-label">DELEGATE</span>
+                    <Badge style="color:darkorange" Pill>@TasksFor(Quadrant.Delegate).Count</Badge>
+                </div>
+                <div class="task-list">
+                    @foreach (var task in TasksFor(Quadrant.Delegate))
+                    {
+                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
+                             draggable="true"
+                             @ondragstart="() => OnDragStart(task)"
+                             @ondragend="OnDragEnd">
+                            <div class="task-card-inner">
+                                <Check TValue="bool"
+                                       Checked="@task.IsCompleted"
+                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
+                                       Class="task-check" />
+                                <div class="task-text">
+                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
+                                    @if (!string.IsNullOrWhiteSpace(task.Description))
+                                    {
+                                        <span class="task-desc">@task.Description</span>
+                                    }
+                                </div>
+                                <span class="drag-handle">⠿</span>
+                            </div>
+                        </div>
+                    }
+                    @if (!TasksFor(Quadrant.Delegate).Any())
+                    {
+                        <div class="empty-hint">Drop tasks here</div>
+                    }
+                </div>
+            </div>
+
+            <!-- Q4: Eliminate -->
+            <div class="quadrant q4 @(dragOverQuadrant == Quadrant.Eliminate ? "drag-over" : "")"
+                 style="grid-column:3;grid-row:3"
+                 ondragover="event.preventDefault()"
+                 @ondragover:preventDefault
+                 @ondrop="() => OnDrop(Quadrant.Eliminate)"
+                 @ondragenter="() => dragOverQuadrant = Quadrant.Eliminate"
+                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.Eliminate) dragOverQuadrant = null; }">
+                <div class="quadrant-header">
+                    <span class="q-label">ELIMINATE</span>
+                    <Badge style="color:black" Pill>@TasksFor(Quadrant.Eliminate).Count</Badge>
+                </div>
+                <div class="task-list">
+                    @foreach (var task in TasksFor(Quadrant.Eliminate))
+                    {
+                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
+                             draggable="true"
+                             @ondragstart="() => OnDragStart(task)"
+                             @ondragend="OnDragEnd">
+                            <div class="task-card-inner">
+                                <Check TValue="bool"
+                                       Checked="@task.IsCompleted"
+                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
+                                       Class="task-check" />
+                                <div class="task-text">
+                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
+                                    @if (!string.IsNullOrWhiteSpace(task.Description))
+                                    {
+                                        <span class="task-desc">@task.Description</span>
+                                    }
+                                </div>
+                                <span class="drag-handle">⠿</span>
+                            </div>
+                        </div>
+                    }
+                    @if (!TasksFor(Quadrant.Eliminate).Any())
+                    {
+                        <div class="empty-hint">Drop tasks here</div>
+                    }
+                </div>
+            </div>
+
+        </div><!-- /matrix-grid -->
+
+        <!-- X-axis label -->
+        <div class="axis-label axis-x">
+            <span>IMPORTANCE →</span>
+        </div>
+
+    </Div><!-- /matrix-axis-wrapper -->
+
+</div>
+
+<style>
+    /* ── Layout ──────────────────────────────────────────────────────────────── */
+    .eisenhower-matrix {
+        font-family: inherit;
+        margin-right: 50px;
+        margin-bottom: 50px;
+    }
+
+    .matrix-axis-wrapper {
+        position: relative;
+        padding-left: 2rem;
+        padding-bottom: 1.75rem;
+    }
+
+    .matrix-grid {
+        display: grid;
+        grid-template-columns: 5rem 1fr 1fr;
+        grid-template-rows: auto 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    /* ── Axis labels ─────────────────────────────────────────────────────────── */
+    .axis-label {
+        position: absolute;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: .12em;
+        color: #6b7280;
+        text-transform: uppercase;
+    }
+
+    .axis-y {
+        left: -0.25rem;
+        top: 50%;
+        transform: translateX(-50%) translateY(-50%) rotate(-90deg);
+        white-space: nowrap;
+    }
+
+    .axis-x {
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+    }
+
+    /* ── Header chips ────────────────────────────────────────────────────────── */
+    .matrix-col-header,
+    .matrix-row-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .axis-chip {
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: .06em;
+        padding: 0.2rem 0.65rem;
+        border-radius: 999px;
+    }
+    
+    .axis-chip.important    { background: rgba(239,68,68,.15);  color: #f87171; text-align: center; }
+    .axis-chip.not-important{ background: rgba(107,114,128,.15); color: #9ca3af; text-align: center; }
+    .axis-chip.urgent       { background: rgba(239,68,68,.15);  color: #f87171; text-align: center;}
+    .axis-chip.not-urgent   { background: rgba(107,114,128,.15); color: #9ca3af; text-align: center; }
+
+    /* ── Quadrants ───────────────────────────────────────────────────────────── */
+    .quadrant {
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        min-height: 200px;
+        transition: box-shadow 0.15s, background 0.15s;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .q1 { background: rgba(239, 68,  68,  0.07); border: 1px solid rgba(239,68,68,0.2); }
+    .q2 { background: rgba( 34,211,238,  0.07); border: 1px solid rgba(34,211,238,0.2); }
+    .q3 { background: rgba(251,191, 36,  0.07); border: 1px solid rgba(251,191,36,0.2); }
+    .q4 { background: rgba(107,114,128,  0.07); border: 1px solid rgba(107,114,128,0.2); }
+
+    .quadrant.drag-over {
+        box-shadow: 0 0 0 2px rgba(167,139,250,0.6);
+        background: rgba(167,139,250,0.1);
+    }
+
+    /* ── Quadrant header ─────────────────────────────────────────────────────── */
+    .quadrant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.25rem;
+    }
+
+    .q-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        color: #9ca3af;
+    }
+
+    /* ── Task list ───────────────────────────────────────────────────────────── */
+    .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        flex: 1;
+    }
+
+    .empty-hint {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        color: #4b5563;
+        border: 1.5px dashed #374151;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        min-height: 60px;
+    }
+
+    /* ── Task card ───────────────────────────────────────────────────────────── */
+    .task-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 0.5rem;
+        padding: 0.45rem 0.6rem;
+        cursor: grab;
+        transition: background 0.1s, opacity 0.1s, transform 0.1s;
+        user-select: none;
+    }
+
+    .task-card:hover {
+        background: rgba(255,255,255,0.08);
+        transform: translateY(-1px);
+    }
+
+    .task-card:active { cursor: grabbing; }
+
+    .task-card.task-done { opacity: 0.45; }
+
+    .task-card-inner {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .task-check { margin-top: 2px; flex-shrink: 0; }
+
+    .task-text {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+        min-width: 0;
+    }
+
+    .task-name {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: black;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .task-name.strikethrough {
+        text-decoration: line-through;
+        color: #6b7280;
+    }
+
+    .task-desc {
+        font-size: 0.7rem;
+        color: #6b7280;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .drag-handle {
+        font-size: 1rem;
+        color: #4b5563;
+        flex-shrink: 0;
+        line-height: 1;
+        margin-top: 1px;
+    }
+
+    .task-card:hover .drag-handle { color: #9ca3af; }
+</style>
