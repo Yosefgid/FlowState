@@ -1,41 +1,143 @@
 ﻿
 
 <ListGroupItem>
-    <Div Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
-        <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3">
+    <Div Flex="Flex.Row.OnDesktop.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
+        <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3" Style=" width:100%">
             <Check TValue="bool" Value="@Todo.IsCompleted" ValueChanged="@OnCheckedChanged"></Check>
-            <Div>
-                <Text TextDecoration="@(Todo.IsCompleted ? TextDecoration.LineThrough : TextDecoration.Default)" TextColor="@(Todo.IsCompleted ? TextColor.Muted : TextColor.Body)">
-                    @Todo.Description
-                </Text>
+            <Div Style="width:90%">
+                @if (IsEdit)
+                {
+                    <Div Flex="Flex.Row" Class="gap-3" >
+                        <Div Flex="Flex.Row.AlignItems.Center" Class="gap-1">
+                            <Label For="todoName">Name:</Label>
+                            <Addon AddonType="AddonType.Body">
+                                <Validations @ref="nameValidations" Mode="ValidationMode.Manual">
+                                    <Validation Validator="@ValidationRule.IsNotEmpty">
+                                        <TextInput ElementId="todoName" @bind-Value="@Todo.Name" Placeholder="Add a Name"></TextInput>
+                                    </Validation>
+                                </Validations>
+                            </Addon>
+                        </Div>
+
+                        <Div Flex="Flex.Row.AlignItems.Center.Grow.Is1"  Class=" w-100 gap-1" >
+                            <Label For="todoDesc">Description:</Label>
+                            <Addon AddonType="AddonType.Body" >
+                                <Validations @ref="descValidations" Mode="ValidationMode.Manual">
+                                    <Validation Validator="@ValidationRule.IsNotEmpty">
+                                        <Div Class="w-100">
+                                            <TextInput  ElementId="todoDesc" @bind-Value="@Todo.Description" Placeholder="Add a Description"></TextInput>
+                                        </Div>
+                                    </Validation>
+                                </Validations>
+                            </Addon>
+                        </Div>
+                    </Div>
+                }
+                else
+                {
+                    <Div>
+                      <Text TextDecoration="@(Todo.IsCompleted ? TextDecoration.LineThrough : TextDecoration.Default)" TextColor="@(Todo.IsCompleted ? TextColor.Muted : TextColor.Body)">
+                        @Todo.Description
+                      </Text>
+                    </Div>
+                }             
                 <Div Margin="Margin.Is1.FromTop">
-                    <Badge Color="@(Todo.IsCompleted ? Color.Success : Color.Info)" Subtle Pill>
+                    <Badge Style="@(Todo.IsCompleted ? "background-color:darkgreen" : "background-color:darkorange")" Subtle Pill>
                         @(Todo.IsCompleted ? "Completed" : "Active")
                     </Badge>
                 </Div>
             </Div>
         </Div>
-        <Button Color="Color.Danger" Outline Size="Size.Small" Clicked="@OnRemoveClicked" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
-            <Icon Name="IconName.Delete" />
-            Remove
-        </Button>
+        <Div Class="d-flex gap-2" >
+            @if (IsEdit)
+            {
+                <Button Color="Color.Secondary" Outline Size="Size.Small" Clicked="@OnUpdateTodo" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                    <Icon Name="IconName.Check" />
+                    Confirm
+                </Button>
+            }
+            else
+            {
+                <Button Color="Color.Secondary" Outline Size="Size.Small" Clicked="@OnUpdateTodo" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                    <Icon Name="IconName.Pen" />
+                    Edit
+                </Button>
+            }
+            
+            <Button Color="Color.Danger" Outline Size="Size.Small" Clicked="@OnRemoveClicked" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                <Icon Name="IconName.Delete" />
+                Remove
+            </Button>
+        </Div>
     </Div>
 </ListGroupItem>
 
 @code {
-    private async Task OnCheckedChanged( bool isChecked )
-    {
-        Todo.IsCompleted = isChecked;
 
-        await StatusChanged.InvokeAsync( isChecked );
-    }
-
-    private Task OnRemoveClicked()
-        => RemoveClicked.InvokeAsync( Todo );
+    [Inject]
+    protected HttpClient Http { get; set; } = default!;
 
     [Parameter] public ToDoTask Todo { get; set; }
 
     [Parameter] public EventCallback<bool> StatusChanged { get; set; }
 
     [Parameter] public EventCallback<ToDoTask> RemoveClicked { get; set; }
+
+    public bool IsEdit { get; set; }
+
+    protected Validations nameValidations;
+    protected Validations descValidations;
+
+
+    private async Task OnCheckedChanged(bool isChecked)
+    {
+        Todo.IsCompleted = isChecked;
+
+        Console.WriteLine("Pressed");
+        
+
+        try
+        {
+            await Http.PatchAsync($"https://localhost:7208/api/tasks/{Todo.Id}/toggle", null);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        await StatusChanged.InvokeAsync(isChecked);
+    }
+
+    private Task OnRemoveClicked()
+        => RemoveClicked.InvokeAsync(Todo);
+
+    protected async Task OnUpdateTodo()
+    {
+
+        if (IsEdit && await nameValidations.ValidateAll() && await descValidations.ValidateAll() )
+        {
+            Console.WriteLine("Pressed");
+            Todo.Name = Todo.Name?.Trim();
+            Todo.Description = Todo.Description?.Trim();
+
+            try
+            {
+                await Http.PutAsJsonAsync($"https://localhost:7208/api/tasks/{Todo.Id}", Todo);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            await nameValidations.ClearAll();
+            await descValidations.ClearAll();
+            
+        }
+
+        IsEdit = !IsEdit;
+        
+    }
+
+   
 }

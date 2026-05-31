@@ -1,6 +1,7 @@
 ﻿using FlowState.Models;
 using FlowState.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace FlowState.Controllers
@@ -81,5 +82,25 @@ namespace FlowState.Controllers
 
             return Ok(updatedTask);
         }
+
+
+        [HttpPatch("set-all/{IsDone}")]
+        public IActionResult ToggleTasksCompleted(bool IsDone ,[FromBody] List<ToDoTask> tasks)
+        {
+
+           _taskService.ToggleTasksCompleted(tasks,IsDone);
+            return Ok();
+        }
+
+        [HttpPatch("delete-selected")]
+        public IActionResult DeleteTasks([FromBody] List<ToDoTask> tasks)
+        {
+            _taskService.DeleteTasks(tasks);
+
+            return Ok();
+        }
+
+
+
     }
 }

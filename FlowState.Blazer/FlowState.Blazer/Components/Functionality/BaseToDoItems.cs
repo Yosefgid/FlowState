@@ -1,19 +1,37 @@
-﻿using Microsoft.AspNetCore.Components;
-using Blazorise;
+﻿using Blazorise;
 using FlowState.Models;
+using Microsoft.AspNetCore.Components;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace FlowState.Blazer.Components.Functionality
 {
 
     public abstract class BaseTodoItems : ComponentBase
     {
-        protected Validations validations;
+
+        [Inject]
+        protected HttpClient Http { get; set; } = default!;
+
+        protected Validations nameValidations;
+        protected Validations descValidations;
+
+
+        protected string name;
 
         protected string description;
 
+        protected string searchTerm = string.Empty;
+
         protected Filter filter = Filter.All;
 
-        protected List<ToDoTask> todos = new() { };
+        protected List<ToDoTask> todos = new() { 
+            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
+            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
+            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
+            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
+            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+
+        };
 
         protected IEnumerable<ToDoTask> Todos
         {
@@ -21,14 +39,21 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 var query = from t in todos select t;
 
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                    query = query.Where(q =>
+                        q.Description.Contains(searchTerm.Trim(), StringComparison.OrdinalIgnoreCase));
+
                 if (filter == Filter.Active)
                     query = from q in query where !q.IsCompleted select q;
 
                 if (filter == Filter.Completed)
                     query = from q in query where q.IsCompleted select q;
-
+         
                 return query;
             }
+
+            
+
         }
 
         protected int TotalCount => todos.Count;
@@ -52,32 +77,80 @@ namespace FlowState.Blazer.Components.Functionality
             this.filter = filter;
         }
 
-        protected void OnCheckAll(bool isChecked)
+        protected  async void OnCheckAll(bool isChecked)
         {
             todos.ForEach(x => x.IsCompleted = isChecked);
+
+            try
+            {
+                await Http.PatchAsJsonAsync($"https://localhost:7208/api/tasks/set-all/{isChecked}", Todos.ToList());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        protected async void OnClearCompleted()
+        {
+
+            List<ToDoTask> tasks = new List<ToDoTask>();
+            tasks.AddRange(Todos.Where(x => x.IsCompleted));
+
+            todos.RemoveAll(x => x.IsCompleted);
+
+
+            try
+            {
+                await Http.PatchAsJsonAsync($"https://localhost:7208/api/tasks/delete-selected/", tasks);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            filter = Filter.All;
         }
 
         protected async Task OnAddTodo()
         {
-            Console.WriteLine("clicked");
-            if (await validations.ValidateAll())
+      
+            if (await nameValidations.ValidateAll() && await descValidations.ValidateAll())
             {
-                todos.Add(new("", description?.Trim(), ""));
+                Console.WriteLine("Pressed");
+                ToDoTask task = new(name?.Trim(), description?.Trim(), "N/A");
+                todos.Add(task);
                 description = null;
+                name = null;
+                try
+                {
+                    await Http.PostAsJsonAsync("https://localhost:7208/api/tasks", task);
 
-                await validations.ClearAll();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                await nameValidations.ClearAll();
+                await descValidations.ClearAll();
+
             }
         }
 
-        protected void OnClearCompleted()
+        protected async Task OnRemoveTodo(ToDoTask todo)
         {
-            todos.RemoveAll(x => x.IsCompleted);
-            filter = Filter.All;
-        }
+            
 
-        protected void OnRemoveTodo(ToDoTask todo)
-        {
-            todos.Remove(todo);
+            try
+            {
+                var response = await Http.DeleteAsync($"https://localhost:7208/api/tasks/{todo.Id}");
+                todos.Remove(todo);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             if (FilteredCount == 0)
                 filter = Filter.All;
@@ -157,7 +230,7 @@ namespace FlowState.Blazer.Components.Functionality
             return $"{ActiveCount} active task{(ActiveCount == 1 ? string.Empty : "s")} remaining.";
         }
 
-        protected async Task CreateTodos(HttpClient Http)
+        protected async Task CreateTodos()
         {
 
             try
