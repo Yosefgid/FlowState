@@ -1,9 +1,10 @@
 using Blazorise;
-using Blazorise.Bootstrap5;
 using Blazorise.Bootstrap;
+using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
-
 using FlowState.Blazer.Components;
+using FlowState.Blazer.Components.Functionality;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,8 @@ builder.Services
     })
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
+
+builder.Services.AddScoped<TaskStateService>();
 
 builder.Services.AddScoped(sp =>
     new HttpClient

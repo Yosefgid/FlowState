@@ -1,6 +1,7 @@
 ﻿using Blazorise;
 using FlowState.Models;
 using Microsoft.AspNetCore.Components;
+using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace FlowState.Blazer.Components.Functionality
@@ -11,6 +12,9 @@ namespace FlowState.Blazer.Components.Functionality
 
         [Inject]
         protected HttpClient Http { get; set; } = default!;
+
+        [Inject]
+        protected TaskStateService TaskState { get; set; } = default!;
 
         protected Validations nameValidations;
         protected Validations descValidations;
@@ -72,6 +76,16 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected int CompletionPercentage => TotalCount == 0 ? 0 : CompletedCount * 100 / TotalCount;
 
+
+        protected override async Task OnInitializedAsync()
+        {
+            await TaskState.RefreshTasks();
+            todos = TaskState.Tasks;
+            foreach (var task in TaskState.Tasks)
+            {
+                Console.WriteLine(task.Description);
+            }
+        }
         protected void SetFilter(Filter filter)
         {
             this.filter = filter;
@@ -230,19 +244,6 @@ namespace FlowState.Blazer.Components.Functionality
             return $"{ActiveCount} active task{(ActiveCount == 1 ? string.Empty : "s")} remaining.";
         }
 
-        protected async Task CreateTodos()
-        {
-
-            try
-            {
-                var response = await Http.GetFromJsonAsync<List<ToDoTask>>("/api/tasks");
-                todos = response;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-            
-        }
+        
     }
 }

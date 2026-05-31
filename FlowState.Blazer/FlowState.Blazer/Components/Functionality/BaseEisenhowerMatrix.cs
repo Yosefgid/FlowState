@@ -13,15 +13,11 @@ namespace FlowState.Blazer.Components.Functionality
         /// Feed in your existing ToDo list from a parent page or the Dashboard.
         /// Tasks are distributed across quadrants on first render.
         /// </summary>
-        [Parameter]
-        public List<ToDoTask> Tasks { get; set; } = new()
-        {
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
-        };
+
+        [Inject]
+        protected TaskStateService TaskState { get; set; } = default!;
+
+        public List<ToDoTask> Tasks { get; set; } = new();
 
         // ── State ────────────────────────────────────────────────────────────────
 
@@ -34,10 +30,14 @@ namespace FlowState.Blazer.Components.Functionality
 
         // ── Lifecycle ────────────────────────────────────────────────────────────
 
-        protected override void OnParametersSet()
+        protected override async Task OnInitializedAsync()
         {
             // Assign any new tasks that don't yet have a quadrant.
             // Default: DoFirst — caller can pre-assign via OnTaskQuadrantChanged.
+           
+            await TaskState.RefreshTasks();
+
+            Tasks = TaskState.Tasks;
             foreach (var task in Tasks)
             {
                 if (!taskQuadrants.ContainsKey(task.Id))
