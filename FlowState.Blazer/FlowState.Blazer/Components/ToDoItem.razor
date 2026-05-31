@@ -98,7 +98,7 @@
 
         try
         {
-            await Http.PatchAsync($"https://localhost:7208/api/tasks/{Todo.Id}/toggle", null);
+            await Http.PatchAsync($"/api/tasks/{Todo.Id}/toggle", null);
 
         }
         catch (Exception ex)
@@ -123,7 +123,7 @@
 
             try
             {
-                await Http.PutAsJsonAsync($"https://localhost:7208/api/tasks/{Todo.Id}", Todo);
+                await Http.PutAsJsonAsync($"/api/tasks/{Todo.Id}", Todo);
 
             }
             catch (Exception ex)

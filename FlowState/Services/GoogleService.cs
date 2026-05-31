@@ -53,10 +53,8 @@ namespace FlowState.Services
             return new ToDoTask(
                 googleEvent.Summary ?? "Untitled Google Event",
                 googleEvent.Description ?? "",
-                googleEvent.Id ?? "",
-                startDate,
-                endDate
-            );
+                googleEvent.Id ?? ""              
+            ).setStartDate(startDate).setEndDate(endDate);
         }
 
         private DateTime GetGoogleEventDateTime(EventDateTime eventDateTime)

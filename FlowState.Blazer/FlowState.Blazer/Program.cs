@@ -15,6 +15,12 @@ builder.Services
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
 
+builder.Services.AddScoped(sp =>
+    new HttpClient
+    {
+        BaseAddress = new Uri("https://localhost:5171")
+    });
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()

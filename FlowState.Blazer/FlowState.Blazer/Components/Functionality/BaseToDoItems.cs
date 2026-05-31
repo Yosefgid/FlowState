@@ -83,7 +83,7 @@ namespace FlowState.Blazer.Components.Functionality
 
             try
             {
-                await Http.PatchAsJsonAsync($"https://localhost:7208/api/tasks/set-all/{isChecked}", Todos.ToList());
+                await Http.PatchAsJsonAsync($"/api/tasks/set-all/{isChecked}", Todos.ToList());
             }
             catch (Exception ex)
             {
@@ -102,7 +102,7 @@ namespace FlowState.Blazer.Components.Functionality
 
             try
             {
-                await Http.PatchAsJsonAsync($"https://localhost:7208/api/tasks/delete-selected/", tasks);
+                await Http.PatchAsJsonAsync($"/api/tasks/delete-selected/", tasks);
 
             }
             catch (Exception ex)
@@ -144,7 +144,7 @@ namespace FlowState.Blazer.Components.Functionality
 
             try
             {
-                var response = await Http.DeleteAsync($"https://localhost:7208/api/tasks/{todo.Id}");
+                var response = await Http.DeleteAsync($"/api/tasks/{todo.Id}");
                 todos.Remove(todo);
             }
             catch (Exception e)
@@ -235,7 +235,7 @@ namespace FlowState.Blazer.Components.Functionality
 
             try
             {
-                var response = await Http.GetFromJsonAsync<List<ToDoTask>>("https://localhost:7208/api/tasks");
+                var response = await Http.GetFromJsonAsync<List<ToDoTask>>("/api/tasks");
                 todos = response;
             }
             catch (Exception e)
