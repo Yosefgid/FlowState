@@ -39,11 +39,8 @@
     <Folder Include="FlowState.Ctrl\" />
     <Folder Include="FlowState.Serv\" />
     <Folder Include="FlowState.Repo\" />
-<<<<<<< Updated upstream
 
 
-=======
->>>>>>> Stashed changes
   </ItemGroup>
 
 </Project>

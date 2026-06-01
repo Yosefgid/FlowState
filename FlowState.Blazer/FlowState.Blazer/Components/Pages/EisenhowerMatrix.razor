@@ -1,4 +1,5 @@
 @using Functionality;
+@using FlowState.Models;
 @inherits BaseEisenhowerMatrix
 @page "/eisen"
 
@@ -10,214 +11,48 @@
             <Heading Size="HeadingSize.Is5" Class="mb-0">Eisenhower Matrix</Heading>
             <Text TextColor="TextColor.Muted" Class="small">Drag tasks between quadrants to reprioritise</Text>
         </Div> *@
-        <Badge Color="Color.Secondary">@AllTasks.Count task@(AllTasks.Count == 1 ? "" : "s")</Badge>
+        <Badge Style="color: black">@AllTasks.Count task@(AllTasks.Count == 1 ? "" : "s")</Badge>
     </Div>
 
-    <!-- Axis Labels -->
-    <Div Class="matrix-axis-wrapper">
-
-        <!-- Y-axis label -->
-        <div class="axis-label axis-y">
-            <span>URGENT</span>
-        </div>
-
-        <!-- Grid -->
-        <div class="matrix-grid">
-
-            <!-- Column headers -->
-            <div class="matrix-col-header" style="grid-column:2">
-                <span class="axis-chip important">⚡ Important</span>
-            </div>
-            <div class="matrix-col-header" style="grid-column:3">
-                <span class="axis-chip not-important">Not Important</span>
-            </div>
-
-            <!-- Row header: Urgent -->
-            <div class="matrix-row-header" style="grid-row:2">
-                <span class="axis-chip urgent">🔥 Urgent</span>
-            </div>
-
-            <!-- Q1: Do First -->
-            <div class="quadrant q1 @(dragOverQuadrant == Quadrant.DoFirst ? "drag-over" : "")"
-                 style="grid-column:2;grid-row:2"
-                 ondragover="event.preventDefault()"
-                 @ondragover:preventDefault
-                 @ondrop="() => OnDrop(Quadrant.DoFirst)"
-                 @ondragenter="() => dragOverQuadrant = Quadrant.DoFirst"
-                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.DoFirst) dragOverQuadrant = null; }">
-                <div class="quadrant-header">
-                    <span class="q-label">DO FIRST</span>
-                    <Badge style="color:red" Pill>@TasksFor(Quadrant.DoFirst).Count</Badge>
-                </div>
-                <div class="task-list">
-                    @foreach (var task in TasksFor(Quadrant.DoFirst))
-                    {
-                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
-                             draggable="true"
-                             @ondragstart="() => OnDragStart(task)"
-                             @ondragend="OnDragEnd">
-                            <div class="task-card-inner">
-                                <Check TValue="bool"
-                                       Checked="@task.IsCompleted"
-                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
-                                       Class="task-check" />
-                                <div class="task-text">
-                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
-                                    @if (!string.IsNullOrWhiteSpace(task.Description))
-                                    {
-                                        <span class="task-desc">@task.Description</span>
-                                    }
-                                </div>
-                                <span class="drag-handle">⠿</span>
+    <DropContainer TItem="ToDoTask" Items="@AllTasks" ItemsFilter="@((item, dropZone) =>
+        EisenToString.TryGetValue(item.Category, out var zone) && zone == dropZone)"  ItemDropped="@ItemDropped" Flex="Flex.Wrap.Grow.Is1">
+        <ChildContent>
+            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Do] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
+                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Do</Heading>
+            </DropZone>
+            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Schedule] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
+                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Schedule</Heading>
+            </DropZone>
+            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Delegate] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
+                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Delegate</Heading>
+            </DropZone>
+            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Eliminate] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
+                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Eliminate</Heading>
+            </DropZone>
+        </ChildContent>
+        <ItemTemplate >
+            <Card Shadow="Shadow.Default" Margin="Margin.Is3.OnY">
+                <CardBody>
+                    <div class="task-card @(context.IsCompleted ? "task-done" : "")">                        
+                        <div class="task-card-inner">
+                            <Check TValue="bool"
+                                   Checked="@context.IsCompleted"
+                                   CheckedChanged="@(async (bool isChecked) => await ToggleTask(context, isChecked))"
+                                   Class="task-check" />
+                            <div class="task-text">
+                                <span class="task-name @(context.IsCompleted ? "strikethrough" : "")">@context.Name</span>
+                                @if (!string.IsNullOrWhiteSpace(context.Description))
+                                {
+                                    <span class="task-desc">@context.Description</span>
+                                }
                             </div>
+                            <span class="drag-handle">⠿</span>
                         </div>
-                    }
-                    @if (!TasksFor(Quadrant.DoFirst).Any())
-                    {
-                        <div class="empty-hint">Drop tasks here</div>
-                    }
-                </div>
-            </div>
-
-            <!-- Q2: Schedule -->
-            <div class="quadrant q2 @(dragOverQuadrant == Quadrant.Schedule ? "drag-over" : "")"
-                 style="grid-column:3;grid-row:2"
-                 ondragover="event.preventDefault()"
-                 @ondragover:preventDefault
-                 @ondrop="() => OnDrop(Quadrant.Schedule)"
-                 @ondragenter="() => dragOverQuadrant = Quadrant.Schedule"
-                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.Schedule) dragOverQuadrant = null; }">
-                <div class="quadrant-header">
-                    <span class="q-label">SCHEDULE</span>
-                    <Badge style="color:royalblue" Pill>@TasksFor(Quadrant.Schedule).Count</Badge>
-                </div>
-                <div class="task-list">
-                    @foreach (var task in TasksFor(Quadrant.Schedule))
-                    {
-                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
-                             draggable="true"
-                             @ondragstart="() => OnDragStart(task)"
-                             @ondragend="OnDragEnd">
-                            <div class="task-card-inner">
-                                <Check TValue="bool"
-                                       Checked="@task.IsCompleted"
-                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
-                                       Class="task-check" />
-                                <div class="task-text">
-                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
-                                    @if (!string.IsNullOrWhiteSpace(task.Description))
-                                    {
-                                        <span class="task-desc">@task.Description</span>
-                                    }
-                                </div>
-                                <span class="drag-handle">⠿</span>
-                            </div>
-                        </div>
-                    }
-                    @if (!TasksFor(Quadrant.Schedule).Any())
-                    {
-                        <div class="empty-hint">Drop tasks here</div>
-                    }
-                </div>
-            </div>
-
-            <!-- Row header: Not Urgent -->
-            <div class="matrix-row-header" style="grid-row:3">
-                <span class="axis-chip not-urgent">Not Urgent</span>
-            </div>
-
-            <!-- Q3: Delegate -->
-            <div class="quadrant q3 @(dragOverQuadrant == Quadrant.Delegate ? "drag-over" : "")"
-                 style="grid-column:2;grid-row:3"
-                 ondragover="event.preventDefault()"
-                 @ondragover:preventDefault
-                 @ondrop="() => OnDrop(Quadrant.Delegate)"
-                 @ondragenter="() => dragOverQuadrant = Quadrant.Delegate"
-                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.Delegate) dragOverQuadrant = null; }">
-                <div class="quadrant-header">
-                    <span class="q-label">DELEGATE</span>
-                    <Badge style="color:darkorange" Pill>@TasksFor(Quadrant.Delegate).Count</Badge>
-                </div>
-                <div class="task-list">
-                    @foreach (var task in TasksFor(Quadrant.Delegate))
-                    {
-                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
-                             draggable="true"
-                             @ondragstart="() => OnDragStart(task)"
-                             @ondragend="OnDragEnd">
-                            <div class="task-card-inner">
-                                <Check TValue="bool"
-                                       Checked="@task.IsCompleted"
-                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
-                                       Class="task-check" />
-                                <div class="task-text">
-                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
-                                    @if (!string.IsNullOrWhiteSpace(task.Description))
-                                    {
-                                        <span class="task-desc">@task.Description</span>
-                                    }
-                                </div>
-                                <span class="drag-handle">⠿</span>
-                            </div>
-                        </div>
-                    }
-                    @if (!TasksFor(Quadrant.Delegate).Any())
-                    {
-                        <div class="empty-hint">Drop tasks here</div>
-                    }
-                </div>
-            </div>
-
-            <!-- Q4: Eliminate -->
-            <div class="quadrant q4 @(dragOverQuadrant == Quadrant.Eliminate ? "drag-over" : "")"
-                 style="grid-column:3;grid-row:3"
-                 ondragover="event.preventDefault()"
-                 @ondragover:preventDefault
-                 @ondrop="() => OnDrop(Quadrant.Eliminate)"
-                 @ondragenter="() => dragOverQuadrant = Quadrant.Eliminate"
-                 @ondragleave="() => { if (dragOverQuadrant == Quadrant.Eliminate) dragOverQuadrant = null; }">
-                <div class="quadrant-header">
-                    <span class="q-label">ELIMINATE</span>
-                    <Badge style="color:black" Pill>@TasksFor(Quadrant.Eliminate).Count</Badge>
-                </div>
-                <div class="task-list">
-                    @foreach (var task in TasksFor(Quadrant.Eliminate))
-                    {
-                        <div class="task-card @(task.IsCompleted ? "task-done" : "")"
-                             draggable="true"
-                             @ondragstart="() => OnDragStart(task)"
-                             @ondragend="OnDragEnd">
-                            <div class="task-card-inner">
-                                <Check TValue="bool"
-                                       Checked="@task.IsCompleted"
-                                       @* CheckedChanged="@(_ => ToggleTask(task))" *@
-                                       Class="task-check" />
-                                <div class="task-text">
-                                    <span class="task-name @(task.IsCompleted ? "strikethrough" : "")">@task.Name</span>
-                                    @if (!string.IsNullOrWhiteSpace(task.Description))
-                                    {
-                                        <span class="task-desc">@task.Description</span>
-                                    }
-                                </div>
-                                <span class="drag-handle">⠿</span>
-                            </div>
-                        </div>
-                    }
-                    @if (!TasksFor(Quadrant.Eliminate).Any())
-                    {
-                        <div class="empty-hint">Drop tasks here</div>
-                    }
-                </div>
-            </div>
-
-        </div><!-- /matrix-grid -->
-
-        <!-- X-axis label -->
-        <div class="axis-label axis-x">
-            <span>IMPORTANCE →</span>
-        </div>
-
-    </Div><!-- /matrix-axis-wrapper -->
+                    </div>
+                </CardBody>
+            </Card>
+        </ItemTemplate> 
+    </DropContainer>
 
 </div>
 

@@ -14,8 +14,6 @@ namespace FlowState.Models
 
         public bool IsCompleted { get; set; }
 
-        public static int IdCount { get; set; } = 0; // until connected to acc db service at the top
-
         public DateTime? TimeCompleted { get; set; }
         [Required]
         public DateTime TimeSet { get; set; }
@@ -24,21 +22,12 @@ namespace FlowState.Models
 
         public DateTime EndDate { get; set; }
 
+        public EisenCat Category { get; set; }
+
         public string? GoogleId { get; set; }
 
-      
-        public ToDoTask( string name, string description, string googleId, DateTime startDate, DateTime endDate)
-        {         
-            Name = name;
-            Description = description;
-            IsCompleted = false;
-            TimeSet = DateTime.Now;
-            GoogleId = googleId;
-            Id = ++IdCount;
-            StartDate = startDate;
-            EndDate = endDate;
-        }
 
+      
         public ToDoTask(string name, string description, string googleId)
         {
             Name = name;
@@ -47,6 +36,20 @@ namespace FlowState.Models
             TimeSet = DateTime.Now;
             GoogleId = googleId;
             Id = ++IdCount;
+            Category = EisenCat.Do;
+        }
+
+
+        public ToDoTask setStartDate(DateTime date)
+        {
+            this.StartDate = date;
+            return this;
+        }
+
+        public ToDoTask setEndDate(DateTime date)
+        {
+            this.EndDate = date;
+            return this;
         }
 
     }

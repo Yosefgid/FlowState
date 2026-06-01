@@ -1,27 +1,15 @@
-﻿@page "/"
+﻿@inject TaskStateService TaskState
+@page "/"
 
-<Dashboard Tasks="todos"></Dashboard>
+<Dashboard ></Dashboard>
 
 
 @code {
 
-    [Inject]
-    protected HttpClient Http { get; set; } = default!;
-
-    public List<ToDoTask> todos;
-
     protected override async Task OnInitializedAsync()
     {
 
-        try
-        {
-            var response = await Http.GetFromJsonAsync<List<ToDoTask>>("https://localhost:7208/api/tasks");
-            todos =  response ?? new List<ToDoTask>();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
+        await TaskState.RefreshTasks();
 
     }
 }

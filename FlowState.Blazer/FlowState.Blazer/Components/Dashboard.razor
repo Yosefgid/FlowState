@@ -1,4 +1,5 @@
-﻿
+﻿@inject NavigationManager Navigation
+@inject TaskStateService TaskState
 <div class="dashboard">
 
     <!-- Right: Controls -->
@@ -58,16 +59,18 @@
                     </Div>
                 </CardHeader>
                 <CardBody Class="scroll-row">
-                    <Div style=" text-align:center">
-                        <Card Style="flex-shrink:0">
+                    <Div Style="text-align:center">
+                        <Card Style="flex-shrink:0; cursor:pointer"
+                              @onclick="() => ToEisen()">
+
                             <CardBody Class="module">
-                        
-                             
+
                             </CardBody>
-                       
+
                         </Card>
-                        <Text >Eisenhower</Text>
-                    </Div>  
+
+                        <Text>Eisenhower</Text>
+                    </Div>
                     
                     <Div style=" text-align:center">
                         <Card Style="flex-shrink:0">
@@ -185,8 +188,18 @@
 
 @code {
 
-    [Parameter]
-    public List<ToDoTask> Tasks { get; set; }
+    private List<ToDoTask> Tasks ;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await TaskState.RefreshTasks();
+        Tasks = TaskState.Tasks;
+    }
+
+    private void ToEisen()
+    {
+        Navigation.NavigateTo($"/eisen");
+    }
 
     // ── Session edit ──────────────────────────────────────────────────────────
     private string selectedRange = "Session0";

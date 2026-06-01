@@ -50,7 +50,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Http.GetFromJsonAsync<List<ToDoTask>>("api/calendar");
+        var result = await Http.GetFromJsonAsync<List<ToDoTask>>("/api/calendar");
 
         if (result is not null)
         {

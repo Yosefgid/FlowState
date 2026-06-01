@@ -1,9 +1,9 @@
-﻿
+﻿@inject TaskStateService TaskState
 
 <ListGroupItem>
     <Div Flex="Flex.Row.OnDesktop.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
         <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3" Style=" width:100%">
-            <Check TValue="bool" Value="@Todo.IsCompleted" ValueChanged="@OnCheckedChanged"></Check>
+            <Check TValue="bool" Value="@Todo.IsCompleted" ValueChanged="@ToggleDone"></Check>
             <Div Style="width:90%">
                 @if (IsEdit)
                 {
@@ -89,24 +89,9 @@
     protected Validations descValidations;
 
 
-    private async Task OnCheckedChanged(bool isChecked)
+    private async Task ToggleDone(bool isChecked)
     {
-        Todo.IsCompleted = isChecked;
-
-        Console.WriteLine("Pressed");
-        
-
-        try
-        {
-            await Http.PatchAsync($"https://localhost:7208/api/tasks/{Todo.Id}/toggle", null);
-
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-        }
-
-        await StatusChanged.InvokeAsync(isChecked);
+        await TaskState.OnCheckedChanged(Todo, isChecked, StatusChanged);
     }
 
     private Task OnRemoveClicked()
@@ -123,7 +108,7 @@
 
             try
             {
-                await Http.PutAsJsonAsync($"https://localhost:7208/api/tasks/{Todo.Id}", Todo);
+                await Http.PutAsJsonAsync($"/api/tasks/{Todo.Id}", Todo);
 
             }
             catch (Exception ex)

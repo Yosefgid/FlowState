@@ -1,10 +1,9 @@
+using Blazorise;
 using FlowState.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace FlowState.Blazer.Components.Functionality
-{
-    public enum Quadrant { DoFirst, Schedule, Delegate, Eliminate }
-
+{  
     public abstract class BaseEisenhowerMatrix : ComponentBase
     {
         // ── Parameters ──────────────────────────────────────────────────────────
@@ -13,89 +12,70 @@ namespace FlowState.Blazer.Components.Functionality
         /// Feed in your existing ToDo list from a parent page or the Dashboard.
         /// Tasks are distributed across quadrants on first render.
         /// </summary>
-        [Parameter]
-        public List<ToDoTask> Tasks { get; set; } = new()
+
+        [Inject]
+        protected TaskStateService TaskState { get; set; } = default!;
+
+        public List<ToDoTask> Tasks { get; set; } = new();
+
+        public readonly Dictionary<string, EisenCat> StringToEisen = new()
         {
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+            { "Do", EisenCat.Do },
+            { "Schedule", EisenCat.Schedule },
+            { "Delegate", EisenCat.Delegate },
+            { "Eliminate", EisenCat.Eliminate }
         };
 
-        // ── State ────────────────────────────────────────────────────────────────
+        public readonly Dictionary<EisenCat, string> EisenToString = new()
+        {
+            { EisenCat.Eliminate, "Eliminate" },
+            { EisenCat.Delegate, "Delegate" },
+            { EisenCat.Schedule, "Schedule" },
+            { EisenCat.Do, "Do First" }
+        };
 
-        // Maps every task ID to its current quadrant
-        protected Dictionary<int, Quadrant> taskQuadrants = new();
 
-        // Drag state
-        protected ToDoTask? draggingTask;
-        protected Quadrant? dragOverQuadrant;
 
         // ── Lifecycle ────────────────────────────────────────────────────────────
 
-        protected override void OnParametersSet()
+        protected override async Task OnInitializedAsync()
         {
             // Assign any new tasks that don't yet have a quadrant.
             // Default: DoFirst — caller can pre-assign via OnTaskQuadrantChanged.
-            foreach (var task in Tasks)
-            {
-                if (!taskQuadrants.ContainsKey(task.Id))
-                    taskQuadrants[task.Id] = Quadrant.DoFirst;
-            }
+           
+            await TaskState.RefreshTasks();
 
-            // Remove orphaned entries (tasks removed from the parent list)
-            var activeIds = Tasks.Select(t => t.Id).ToHashSet();
-            foreach (var id in taskQuadrants.Keys.Where(k => !activeIds.Contains(k)).ToList())
-                taskQuadrants.Remove(id);
+            Tasks = TaskState.Tasks;
+
+            Console.WriteLine($"Loaded {Tasks.Count} tasks");
+            await InvokeAsync(StateHasChanged);
+
         }
 
         // ── Computed helpers ─────────────────────────────────────────────────────
 
         protected List<ToDoTask> AllTasks => Tasks;
 
-        protected List<ToDoTask> TasksFor(Quadrant q) =>
-            Tasks.Where(t => taskQuadrants.TryGetValue(t.Id, out var tq) && tq == q).ToList();
+
 
         // ── Drag & drop ──────────────────────────────────────────────────────────
 
-        protected void OnDragStart(ToDoTask task)
+        public Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
-            draggingTask = task;
-        }
-
-        protected void OnDragEnd()
-        {
-            draggingTask = null;
-            dragOverQuadrant = null;
-        }
-
-        protected void OnDrop(Quadrant target)
-        {
-            if (draggingTask is null) return;
-
-            taskQuadrants[draggingTask.Id] = target;
-            draggingTask = null;
-            dragOverQuadrant = null;
-
-            // Notify parent if wired up
-            OnTaskMoved.InvokeAsync((draggingTask?.Id ?? 0, target));
+            dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
+            return Task.CompletedTask;
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────
 
-        protected void ToggleTask(ToDoTask task)
+
+        protected async Task ToggleTask(ToDoTask task, bool isChecked)
         {
-            task.IsCompleted = !task.IsCompleted;
+            Console.WriteLine("DO SOMETHING");
+            await TaskState.OnCheckedChanged(task,  isChecked);
+            await InvokeAsync(StateHasChanged);
         }
+        
 
-        // ── Callbacks ────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Fires when a task is moved to a new quadrant.
-        /// Payload: (taskId, newQuadrant)
-        /// </summary>
-        [Parameter]
-        public EventCallback<(int TaskId, Quadrant NewQuadrant)> OnTaskMoved { get; set; }
     }
 }
