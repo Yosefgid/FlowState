@@ -62,7 +62,7 @@
                                        ValueChanged="@(async (bool isChecked) => await ToggleTask(context, isChecked))"
                                        Class="task-check" />
                                 <div class="task-text">
-                                    <span class="task-name @(context.IsCompleted ? "strikethrough" : "")">@context.Name</span>
+                                        <Span Class="task-name">@context.Name</Span>
                                     @if (!string.IsNullOrWhiteSpace(context.Description))
                                     {
                                         <span class="task-desc">@context.Description</span>

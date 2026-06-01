@@ -35,10 +35,13 @@
                 }
                 else
                 {
-                    <Div>
-                      <Text TextDecoration="@(Todo.IsCompleted ? TextDecoration.LineThrough : TextDecoration.Default)" TextColor="@(Todo.IsCompleted ? TextColor.Muted : TextColor.Body)">
-                        @Todo.Description
-                      </Text>
+                    <Div Flex=Flex.Column>
+                        <Text Style="font-weight:bold;" TextDecoration="@(Todo.IsCompleted? TextDecoration.LineThrough: TextDecoration.Default)" TextColor="@(Todo.IsCompleted? TextColor.Muted: TextColor.Body)">
+                            @Todo.Name
+                        </Text>
+                        <Text TextDecoration="@(Todo.IsCompleted ? TextDecoration.LineThrough : TextDecoration.Default)" TextColor="@(Todo.IsCompleted ? TextColor.Muted : TextColor.Body)">
+                            @Todo.Description
+                        </Text>
                     </Div>
                 }             
                 <Div Margin="Margin.Is1.FromTop">
