@@ -47,36 +47,38 @@ public class AuthControllerTests
     }
 
     [Test]
-    public void Register_WithValidDto_Returns200WithToken() 
+    public void Register_WithValidDto_Returns201WithToken() 
     {
         var dto = new RegisterDto
         {
             Username = "karl",
             Email = "karl@max.com",
-            Password = "Qwerty123"
+            Password = "Qwerty123!",
+            ConfirmPassword = "Qwerty123!"
         };
 
         _mockAuthServices.Setup(s => s.Register(dto.Username, dto.Email, dto.Password))
             .Returns(_validUser);
 
         var result = _controller.Register(dto);
-        Assert.That(result, Is.InstanceOf<OkObjectResult>());
-        var ok = (OkObjectResult)result;
-        Assert.That(ok.Value, Is.InstanceOf<AuthResponseDto>());
-        var response = (AuthResponseDto)ok.Value!;
+        Assert.That(result, Is.InstanceOf<CreatedResult>());
+        var created = (CreatedResult)result;
+        Assert.That(created.Value, Is.InstanceOf<AuthResponseDto>());
+        var response = (AuthResponseDto)created.Value!;
         Assert.That(response.Token, Is.Not.Empty);
         Assert.That(response.Username, Is.EqualTo("karl"));
 
 
     }
     [Test]
-    public void Register_WithDuplicateUser_Returns409()
+    public void Register_WithDuplicateUser_Returns400()
     {
         var dto = new RegisterDto
         {
             Username = "karl",
             Email = "karl@max.com",
-            Password = "Qwerty123"
+            Password = "Qwerty123!",
+            ConfirmPassword = "Qwerty123"
         };
 
         _mockAuthServices.Setup(s => s.Register(dto.Username, dto.Email, dto.Password))
@@ -84,8 +86,55 @@ public class AuthControllerTests
 
         var result = _controller.Register(dto);
 
-        Assert.That(result, Is.InstanceOf<ConflictObjectResult>());
+        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
     }
+    [Test]
+    public void Register_WithWeakPassword_Returns400()
+    {
+        var dto = new RegisterDto
+        {
+            Username = "karl",
+            Email = "karl@max.com",
+            Password = "weak",
+            ConfirmPassword = "weak"
+        };
+
+        var result = _controller.Register(dto);
+
+        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+    }
+    [Test]
+    public void Register_WithInvalidEmail_Returns400()
+    {
+        var dto = new RegisterDto
+        {
+            Username = "karl",
+            Email = "notanemail",
+            Password = "Qwerty123!",
+            ConfirmPassword = "Qwerty123!"
+        };
+
+        var result = _controller.Register(dto);
+
+        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+    }
+
+    [Test]
+    public void Register_WithEmptyUsername_Returns400()
+    {
+        var dto = new RegisterDto
+        {
+            Username = "",
+            Email = "karl@max.com",
+            Password = "Qwerty123!",
+            ConfirmPassword = "Qwerty123!"
+        };
+
+        var result = _controller.Register(dto);
+
+        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
+    }
+
 
     [Test]
     public void Login_WithValidCredentials_Returns200WithToken()

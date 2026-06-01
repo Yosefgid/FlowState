@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 
 namespace FlowState.Controllers
@@ -26,13 +28,30 @@ namespace FlowState.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Username))
+            {
+                return BadRequest("Username is required");
+            };
+            if (string.IsNullOrWhiteSpace(dto.Email) || !new EmailAddressAttribute().IsValid(dto.Email))
+            {
+                return BadRequest("A valid email is required");
+            };
+            if(string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 8 || !Regex.IsMatch(dto.Password, @"^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).+$"))
+            {
+                return BadRequest("Password must be at 8 or more characters and contain one uppercase letter, one number and one special character.");
+            }
+            if(dto.Password != dto.ConfirmPassword)
+            {
+                return BadRequest("Password do not match try again ");
+            }
             var user = _authServices.Register(dto.Username, dto.Email, dto.Password);
             if (user == null)
             {
                 return Conflict(new { message = "Email or username is already in use." });
             }
-
-            return Ok(BuildAuthResponse(user));
+            //instead of returning the uri retun an empty string
+            //allows us to isolate user management routes 
+            return Created(string.Empty, BuildAuthResponse(user));
         }
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto dto)
