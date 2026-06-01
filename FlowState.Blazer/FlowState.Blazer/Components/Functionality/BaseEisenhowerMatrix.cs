@@ -16,6 +16,9 @@ namespace FlowState.Blazer.Components.Functionality
         [Inject]
         protected TaskStateService TaskState { get; set; } = default!;
 
+        [Inject]
+        protected HttpClient Http { get; set; } = default!;
+
         public List<ToDoTask> Tasks { get; set; } = new();
 
         public readonly Dictionary<string, EisenCat> StringToEisen = new()
@@ -67,10 +70,11 @@ namespace FlowState.Blazer.Components.Functionality
 
         // ── Drag & drop ──────────────────────────────────────────────────────────
 
-        public Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
+        public async Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
             dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
-            return Task.CompletedTask;
+
+            await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────

@@ -100,6 +100,20 @@ namespace FlowState.Controllers
             return Ok();
         }
 
+        [HttpPatch("assign-eisen/{id}")]
+        public IActionResult ChangeEisen(int id,[FromBody] EisenCat cat)
+        {
+            var updatedTask = _taskService.AssignEisen(id,cat);
+
+            if (updatedTask == null)
+                return NotFound();
+
+
+            return Ok(updatedTask);
+        }
+
+
+
 
 
     }

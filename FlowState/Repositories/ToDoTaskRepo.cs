@@ -19,6 +19,8 @@ namespace FlowState.Repositories
         public void ToggleTasksCompleted(List<ToDoTask> tasks, bool IsDone);
 
         public void DeleteTasks(List<ToDoTask> tasks);
+
+        public ToDoTask AssignEisen(int id, EisenCat cat);
     }
     public class ToDoTaskRepo : IToDoTaskRepo
     {
@@ -134,6 +136,19 @@ namespace FlowState.Repositories
 
             _dbContext.SaveChanges();
 
+        }
+
+        public ToDoTask AssignEisen (int id , EisenCat cat)
+        {
+            var task = _dbContext.Tasks.FirstOrDefault(t => t.Id == id);
+
+            if (task == null)
+                return null;
+
+            task.Category = cat;
+
+            _dbContext.SaveChanges();
+            return task;
         }
 
 
