@@ -24,7 +24,7 @@ builder.Services.AddScoped<TaskStateService>();
 builder.Services.AddScoped(sp =>
     new HttpClient
     {
-        BaseAddress = new Uri("https://localhost:5171")
+        BaseAddress = new Uri("http://localhost:5170")
     });
 
 // Add services to the container.

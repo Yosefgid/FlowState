@@ -1,16 +1,59 @@
-﻿@code {
-    
-}
+﻿@inject NavigationManager Navigation
 
 <div class="topbar d-flex align-items-center justify-content-left px-4 py-3 gap-5">
 
-    <!-- Left: Title -->
     <div class="topbar-title-group">
-        <Heading Size="HeadingSize.Is4" Class="page-title mb-0">Current Page</Heading>
+        <Heading Size="HeadingSize.Is4" Class="page-title mb-0">
+            @CurrentPageTitle
+        </Heading>
+
         <Text TextColor="TextColor.Muted" Class="page-subtitle">
-            Track your productivity at a glance (filler)
+            @CurrentPageSubtitle
         </Text>
     </div>
 
-    
 </div>
+
+@code {
+
+    private string CurrentPageTitle => GetPageTitle();
+
+    private string CurrentPageSubtitle => GetPageSubtitle();
+
+    private string GetPageTitle()
+    {
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+
+        return path switch
+        {
+            "" => "Dashboard",
+            "dashboard" => "Dashboard",
+            "tasks" => "Tasks",
+            "sessions" => "Sessions",
+            "calendar" => "Calendar",
+            "reports" => "Reports",
+            "goals" => "Goals",
+            "habits" => "Habits",
+            "settings" => "Settings",
+            _ => "FlowDesk"
+        };
+    }
+
+    private string GetPageSubtitle()
+    {
+        var path = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+
+        return path switch
+        {
+            "dashboard" => "Track your productivity at a glance",
+            "tasks" => "Manage your tasks and priorities",
+            "sessions" => "View and manage focus sessions",
+            "calendar" => "Manage your schedule and events",
+            "reports" => "Analyse productivity trends",
+            "goals" => "Track long-term objectives",
+            "habits" => "Build better routines",
+            "settings" => "Configure your application",
+            _ => ""
+        };
+    }
+}

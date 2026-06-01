@@ -2,16 +2,16 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 
-<div class="calendar-container">
-    <div class="calendar-header">
-        <button @onclick="PreviousMonth">‹</button>
+<div class="google-calendar">
+    <div class="calendar-toolbar">
+        <button class="nav-button" @onclick="PreviousMonth">‹</button>
 
         <h2>@currentMonth.ToString("MMMM yyyy")</h2>
 
-        <button @onclick="NextMonth">›</button>
+        <button class="nav-button" @onclick="NextMonth">›</button>
     </div>
 
-    <div class="calendar-days">
+    <div class="calendar-weekdays">
         <div>Mon</div>
         <div>Tue</div>
         <div>Wed</div>
@@ -25,19 +25,167 @@
         @foreach (var day in CalendarDays)
         {
             <div class="calendar-cell @(day.Month != currentMonth.Month ? "other-month" : "")">
-                <div class="day-number">@day.Day</div>
+                <div class="day-number @(day.Date == DateTime.Today ? "today" : "")">
+                    @day.Day
+                </div>
 
-                @foreach (var task in GetTasksForDay(day))
-                {
-                    <div class="calendar-event">
-                        <strong>@task.Name</strong>
-                        <span>@task.StartDate.ToString("HH:mm")</span>
-                    </div>
-                }
+                <div class="events-list">
+                    @foreach (var task in GetTasksForDay(day))
+                    {
+                        <div class="calendar-event" title="@task.Description">
+                            <span class="event-time">@task.StartDate.ToString("HH:mm")</span>
+                            <span class="event-title">@task.Name</span>
+                        </div>
+                    }
+                </div>
             </div>
         }
     </div>
 </div>
+
+<style>
+    .google-calendar {
+        width: 100%;
+        height: calc(100vh - 150px);
+        background: #fff;
+        border: 1px solid #dadce0;
+        border-radius: 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        font-family: Arial, sans-serif;
+    }
+
+    .calendar-toolbar {
+        height: 64px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 0 20px;
+        border-bottom: 1px solid #dadce0;
+    }
+
+        .calendar-toolbar h2 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 400;
+            color: #3c4043;
+        }
+
+    .nav-button {
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+        color: #5f6368;
+    }
+
+        .nav-button:hover {
+            background: #f1f3f4;
+        }
+
+    .calendar-weekdays {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        border-bottom: 1px solid #dadce0;
+        background: #fff;
+    }
+
+        .calendar-weekdays div {
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #70757a;
+            text-transform: uppercase;
+        }
+
+    .calendar-grid {
+        flex: 1;
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        grid-template-rows: repeat(6, 1fr);
+    }
+
+    .calendar-cell {
+        border-right: 1px solid #dadce0;
+        border-bottom: 1px solid #dadce0;
+        padding: 6px;
+        min-width: 0;
+        overflow: hidden;
+        background: #fff;
+    }
+
+        .calendar-cell:nth-child(7n) {
+            border-right: none;
+        }
+
+    .other-month {
+        background: #f8f9fa;
+        color: #9aa0a6;
+    }
+
+    .day-number {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #3c4043;
+        border-radius: 50%;
+    }
+
+    .other-month .day-number {
+        color: #9aa0a6;
+    }
+
+    .day-number.today {
+        background: #1a73e8;
+        color: white;
+        font-weight: 600;
+    }
+
+    .events-list {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+
+    .calendar-event {
+        background: #1a73e8;
+        color: white;
+        border-radius: 4px;
+        padding: 3px 6px;
+        font-size: 12px;
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        cursor: pointer;
+    }
+
+        .calendar-event:hover {
+            background: #1558b0;
+        }
+
+    .event-time {
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    .event-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
 
 @code {
     private List<ToDoTask> tasks = new();
@@ -50,7 +198,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await Http.GetFromJsonAsync<List<ToDoTask>>("/api/calendar");
+        var result = await Http.GetFromJsonAsync<List<ToDoTask>>("api/calendar");
 
         if (result is not null)
         {
@@ -63,7 +211,6 @@
         get
         {
             var firstDayOfMonth = currentMonth;
-            var daysInMonth = DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
 
             var startOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
             var calendarStart = firstDayOfMonth.AddDays(-startOffset);
