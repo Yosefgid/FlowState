@@ -6,6 +6,7 @@ using FlowState.Blazer.Components;
 using FlowState.Blazer.Components.Functionality;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services
@@ -15,6 +16,8 @@ builder.Services
     })
     .AddBootstrapProviders()
     .AddFontAwesomeIcons();
+
+
 
 builder.Services.AddScoped<TaskStateService>();
 

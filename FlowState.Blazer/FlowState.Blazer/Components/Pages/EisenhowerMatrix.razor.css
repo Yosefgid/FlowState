@@ -1,6 +1,8 @@
 ﻿/* ── Layout ──────────────────────────────────────────────────────────────── */
 .eisenhower-matrix {
     font-family: inherit;
+    margin-right: 50px;
+    margin-bottom: 50px;
 }
 
 .matrix-axis-wrapper {
@@ -59,21 +61,25 @@
     .axis-chip.important {
         background: rgba(239,68,68,.15);
         color: #f87171;
+        text-align: center;
     }
 
     .axis-chip.not-important {
         background: rgba(107,114,128,.15);
         color: #9ca3af;
+        text-align: center;
     }
 
     .axis-chip.urgent {
         background: rgba(239,68,68,.15);
         color: #f87171;
+        text-align: center;
     }
 
     .axis-chip.not-urgent {
         background: rgba(107,114,128,.15);
         color: #9ca3af;
+        text-align: center;
     }
 
 /* ── Quadrants ───────────────────────────────────────────────────────────── */
@@ -194,7 +200,7 @@
 .task-name {
     font-size: 0.8rem;
     font-weight: 500;
-    color: #e5e7eb;
+    color: black;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

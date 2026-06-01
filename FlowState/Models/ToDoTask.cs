@@ -22,7 +22,10 @@ namespace FlowState.Models
 
         public DateTime EndDate { get; set; }
 
+        public EisenCat Category { get; set; }
+
         public string? GoogleId { get; set; }
+
 
       
         public ToDoTask(string name, string description, string googleId)
@@ -33,6 +36,7 @@ namespace FlowState.Models
             TimeSet = DateTime.Now;
             GoogleId = googleId;
             Id = ++IdCount;
+            Category = EisenCat.Do;
         }
 
 

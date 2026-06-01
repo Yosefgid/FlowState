@@ -1,10 +1,9 @@
+using Blazorise;
 using FlowState.Models;
 using Microsoft.AspNetCore.Components;
 
 namespace FlowState.Blazer.Components.Functionality
-{
-    public enum Quadrant { DoFirst, Schedule, Delegate, Eliminate }
-
+{  
     public abstract class BaseEisenhowerMatrix : ComponentBase
     {
         // ── Parameters ──────────────────────────────────────────────────────────
@@ -19,14 +18,23 @@ namespace FlowState.Blazer.Components.Functionality
 
         public List<ToDoTask> Tasks { get; set; } = new();
 
-        // ── State ────────────────────────────────────────────────────────────────
+        public readonly Dictionary<string, EisenCat> StringToEisen = new()
+        {
+            { "Do", EisenCat.Do },
+            { "Schedule", EisenCat.Schedule },
+            { "Delegate", EisenCat.Delegate },
+            { "Eliminate", EisenCat.Eliminate }
+        };
 
-        // Maps every task ID to its current quadrant
-        protected Dictionary<int, Quadrant> taskQuadrants = new();
+        public readonly Dictionary<EisenCat, string> EisenToString = new()
+        {
+            { EisenCat.Eliminate, "Eliminate" },
+            { EisenCat.Delegate, "Delegate" },
+            { EisenCat.Schedule, "Schedule" },
+            { EisenCat.Do, "Do First" }
+        };
 
-        // Drag state
-        protected ToDoTask? draggingTask;
-        protected Quadrant? dragOverQuadrant;
+
 
         // ── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -38,64 +46,36 @@ namespace FlowState.Blazer.Components.Functionality
             await TaskState.RefreshTasks();
 
             Tasks = TaskState.Tasks;
-            foreach (var task in Tasks)
-            {
-                if (!taskQuadrants.ContainsKey(task.Id))
-                    taskQuadrants[task.Id] = Quadrant.DoFirst;
-            }
 
-            // Remove orphaned entries (tasks removed from the parent list)
-            var activeIds = Tasks.Select(t => t.Id).ToHashSet();
-            foreach (var id in taskQuadrants.Keys.Where(k => !activeIds.Contains(k)).ToList())
-                taskQuadrants.Remove(id);
+            Console.WriteLine($"Loaded {Tasks.Count} tasks");
+            await InvokeAsync(StateHasChanged);
+
         }
 
         // ── Computed helpers ─────────────────────────────────────────────────────
 
         protected List<ToDoTask> AllTasks => Tasks;
 
-        protected List<ToDoTask> TasksFor(Quadrant q) =>
-            Tasks.Where(t => taskQuadrants.TryGetValue(t.Id, out var tq) && tq == q).ToList();
+
 
         // ── Drag & drop ──────────────────────────────────────────────────────────
 
-        protected void OnDragStart(ToDoTask task)
+        public Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
-            draggingTask = task;
-        }
-
-        protected void OnDragEnd()
-        {
-            draggingTask = null;
-            dragOverQuadrant = null;
-        }
-
-        protected void OnDrop(Quadrant target)
-        {
-            if (draggingTask is null) return;
-
-            taskQuadrants[draggingTask.Id] = target;
-            draggingTask = null;
-            dragOverQuadrant = null;
-
-            // Notify parent if wired up
-            OnTaskMoved.InvokeAsync((draggingTask?.Id ?? 0, target));
+            dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
+            return Task.CompletedTask;
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────
 
-        protected void ToggleTask(ToDoTask task)
+
+        protected async Task ToggleTask(ToDoTask task, bool isChecked)
         {
-            task.IsCompleted = !task.IsCompleted;
+            Console.WriteLine("DO SOMETHING");
+            await TaskState.OnCheckedChanged(task,  isChecked);
+            await InvokeAsync(StateHasChanged);
         }
+        
 
-        // ── Callbacks ────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// Fires when a task is moved to a new quadrant.
-        /// Payload: (taskId, newQuadrant)
-        /// </summary>
-        [Parameter]
-        public EventCallback<(int TaskId, Quadrant NewQuadrant)> OnTaskMoved { get; set; }
     }
 }

@@ -139,7 +139,7 @@ namespace FlowState.Blazer.Components.Functionality
                 name = null;
                 try
                 {
-                    await Http.PostAsJsonAsync("https://localhost:7208/api/tasks", task);
+                    await Http.PostAsJsonAsync("/api/tasks", task);
 
                 }
                 catch (Exception ex)
