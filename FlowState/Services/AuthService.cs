@@ -30,7 +30,7 @@ namespace FlowState.Services
             var user = _userRepo.GetUserByEmail(email.ToLower());
             if (user == null)
             {
-                Console.WriteLine($"User not found for email: {email}");
+         
                 return null;
 
             }
