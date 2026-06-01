@@ -28,7 +28,13 @@ namespace FlowState.Services
        public User? Login(string email, string plainTextPassword)
         {
             var user = _userRepo.GetUserByEmail(email.ToLower());
-            if (user == null) return null;
+            if (user == null)
+            {
+                Console.WriteLine($"User not found for email: {email}");
+                return null;
+
+            }
+           
             return BCrypt.Net.BCrypt.Verify(plainTextPassword, user.PasswordHash) ? user : null;
         }
     }
