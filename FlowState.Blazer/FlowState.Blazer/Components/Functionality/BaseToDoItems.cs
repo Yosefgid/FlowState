@@ -85,6 +85,8 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 Console.WriteLine(task.Description);
             }
+            Console.WriteLine("Tasks");
+
         }
         protected void SetFilter(Filter filter)
         {

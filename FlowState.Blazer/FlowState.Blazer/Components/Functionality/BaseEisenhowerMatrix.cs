@@ -31,7 +31,7 @@ namespace FlowState.Blazer.Components.Functionality
             { EisenCat.Eliminate, "Eliminate" },
             { EisenCat.Delegate, "Delegate" },
             { EisenCat.Schedule, "Schedule" },
-            { EisenCat.Do, "Do First" }
+            { EisenCat.Do, "Do" }
         };
 
 
@@ -42,15 +42,22 @@ namespace FlowState.Blazer.Components.Functionality
         {
             // Assign any new tasks that don't yet have a quadrant.
             // Default: DoFirst — caller can pre-assign via OnTaskQuadrantChanged.
-           
+
+
             await TaskState.RefreshTasks();
-
+          
             Tasks = TaskState.Tasks;
+            foreach (var task in TaskState.Tasks)
+            {
+                Console.WriteLine(task.Description);
+            }
+            Console.WriteLine("Eisen");
 
-            Console.WriteLine($"Loaded {Tasks.Count} tasks");
             await InvokeAsync(StateHasChanged);
 
         }
+
+        
 
         // ── Computed helpers ─────────────────────────────────────────────────────
 

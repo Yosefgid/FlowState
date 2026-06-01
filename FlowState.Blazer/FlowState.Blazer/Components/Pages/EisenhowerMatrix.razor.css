@@ -1,8 +1,8 @@
 ﻿/* ── Layout ──────────────────────────────────────────────────────────────── */
 .eisenhower-matrix {
     font-family: inherit;
-    margin-right: 50px;
-    margin-bottom: 50px;
+    margin: 50px;
+
 }
 
 .matrix-axis-wrapper {
@@ -29,17 +29,41 @@
 }
 
 .axis-y {
-    left: -0.25rem;
+    left: 240px;
     top: 50%;
     transform: translateX(-50%) translateY(-50%) rotate(-90deg);
     white-space: nowrap;
+    margin-right: 10px;
 }
 
 .axis-x {
     bottom: 0;
-    left: 50%;
+    left: 55%;
     transform: translateX(-50%);
     white-space: nowrap;
+  
+}
+
+.axis-y, .axis-x {
+    transition: opacity 0.2s ease;
+}
+
+@media (max-height: 600px) {
+    .axis-y {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .axis-x {
+        opacity: 0;
+        pointer-events: none;
+    }
+    .axis-y {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 /* ── Header chips ────────────────────────────────────────────────────────── */
@@ -51,35 +75,58 @@
 }
 
 .axis-chip {
-    font-size: 0.7rem;
+    font-size: 1rem;
     font-weight: 600;
     letter-spacing: .06em;
     padding: 0.2rem 0.65rem;
     border-radius: 999px;
+
 }
 
     .axis-chip.important {
+        position: absolute;
+        top: -40px;
         background: rgba(239,68,68,.15);
         color: #f87171;
+        padding: 0.25rem 0.6rem;
         text-align: center;
+        white-space: nowrap;
     }
 
     .axis-chip.not-important {
+        position: absolute;
+        top: -40px;
         background: rgba(107,114,128,.15);
         color: #9ca3af;
+        padding: 0.25rem 0.6rem;
         text-align: center;
+        white-space: nowrap;
     }
 
     .axis-chip.urgent {
+        position: absolute;
+        left: -25px;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(-90deg);
+        transform-origin: center;
+        padding: 0.25rem 0.6rem;
         background: rgba(239,68,68,.15);
         color: #f87171;
         text-align: center;
+        white-space: nowrap;
     }
 
     .axis-chip.not-urgent {
+        position: absolute;
+        left: -25px;
+        top: 50%;
+        transform: translate(-50%, -50%) rotate(-90deg);
+        transform-origin: center;
+        padding: 0.25rem 0.6rem;
         background: rgba(107,114,128,.15);
         color: #9ca3af;
         text-align: center;
+        white-space: nowrap;
     }
 
 /* ── Quadrants ───────────────────────────────────────────────────────────── */

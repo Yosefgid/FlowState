@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @inject TaskStateService TaskState
+@rendermode InteractiveServer
 <div class="dashboard">
 
     <!-- Right: Controls -->
@@ -194,6 +195,13 @@
     {
         await TaskState.RefreshTasks();
         Tasks = TaskState.Tasks;
+
+        foreach (var task in TaskState.Tasks)
+        {
+            Console.WriteLine(task.Description);
+        }
+
+        Console.WriteLine("DASHBOARD");
     }
 
     private void ToEisen()

@@ -21,12 +21,18 @@ namespace FlowState.Blazer.Components.Functionality
         };
 
 
+
+
         public async Task RefreshTasks()
         {
             try
             {
                 var response = await Http.GetFromJsonAsync<List<ToDoTask>>("/api/tasks");
-                Tasks = response == null ? Tasks : response;
+                if (response != null)
+                {
+                    Tasks.Clear();
+                    Tasks.AddRange(response);
+                }
                 //foreach (var task in Tasks)
                 //{
                 //    Console.WriteLine(task.Description);
