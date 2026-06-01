@@ -74,7 +74,7 @@ namespace FlowState.Blazer.Components.Functionality
         {
             dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
 
-            await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
+            //await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────
