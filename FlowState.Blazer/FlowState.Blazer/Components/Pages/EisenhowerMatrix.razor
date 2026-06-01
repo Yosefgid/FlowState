@@ -58,8 +58,8 @@
                         <div class="task-card @(context.IsCompleted ? "task-done" : "")">                        
                             <div class="task-card-inner">
                                 <Check TValue="bool"
-                                       Checked="@context.IsCompleted"
-                                       CheckedChanged="@(async (bool isChecked) => await ToggleTask(context, isChecked))"
+                                       Value="@context.IsCompleted"
+                                       ValueChanged="@(async (bool isChecked) => await ToggleTask(context, isChecked))"
                                        Class="task-check" />
                                 <div class="task-text">
                                     <span class="task-name @(context.IsCompleted ? "strikethrough" : "")">@context.Name</span>
