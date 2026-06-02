@@ -103,6 +103,15 @@ namespace FlowState.Services
                 DataStore = new FileDataStore("GoogleCalendarTokens", true)
             });
         }
+
+        public async Task<bool> IsGoogleCalendarConnectedAsync(string userId)
+        {
+            var flow = CreateGoogleAuthorizationCodeFlow();
+
+            var token = await flow.LoadTokenAsync(userId, CancellationToken.None);
+
+            return token != null;
+        }
     }
 
     public interface IGoogleCalendarClient
@@ -112,5 +121,7 @@ namespace FlowState.Services
         Task ExchangeCodeForTokensAsync(string code, string userId);
 
         Task<List<Event>> GetCalendarEventsAsync(string userId);
+
+        Task<bool> IsGoogleCalendarConnectedAsync(string userId);
     }
 }

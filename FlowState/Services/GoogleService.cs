@@ -71,6 +71,11 @@ namespace FlowState.Services
 
             return DateTime.Now;
         }
+
+        public async Task<bool> IsGoogleCalendarConnectedAsync(string userId)
+        {
+            return await _googleCalendarClient.IsGoogleCalendarConnectedAsync(userId);
+        }
     }
 
     public interface IGoogleService
@@ -82,5 +87,7 @@ namespace FlowState.Services
         Task<List<ToDoTask>> ImportGoogleCalendarEventsAsync(string userId);
 
         ToDoTask MapGoogleEventToTask(Event googleEvent);
+
+        Task<bool> IsGoogleCalendarConnectedAsync(string userId);
     }
 }
