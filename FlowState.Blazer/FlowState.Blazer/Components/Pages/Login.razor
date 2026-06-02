@@ -1,0 +1,63 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@using FlowState.Blazer.Models.Auth
+@using FlowState.Blazer.Services
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<div class="container mt-5">
+    <div class ="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <h3 class="mb-4">Login</h3>
+                @if (!string.IsNullOrEmpty(_error))
+                {
+                    <div class="alert alert-danger">@_error</div>
+                }
+                <div class="mb-3">
+                    <label class="from-label">Email</label>
+                    <input class="form-control" type="email" @bind="_request.Email" />
+                </div>
+                <div class="mb-3">
+                    <label class="from-label">Password</label>
+                    <input class="form-control" type="password" @bind="_request.Password" />
+                </div>
+                <button class="btn btn-primary w-100" @onclick="HandleLogin" disabled="@_loading">
+                    @if (_loading)
+                    {
+                        <span>
+                            Logging in..
+                        </span>
+                    }
+                    else
+                    {
+                        <span>Login</span>
+                    }
+                </button>
+                <p class="mt-3" text-center>Don't have an account? <a href="/register">Register</a></p>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+@code {
+    private LoginRequest _request = new();
+    private string? _error;
+    private bool _loading;
+    private async Task HandleLogin()
+    {
+        _error = null;
+        _loading = true;
+        var (success, error) = await AuthService.LoginAsync(_request);
+        if (success)
+        {
+            Navigation.NavigateTo("/");
+        }
+        else
+        {
+            _error = error;
+        }
+        _loading = false;
+    }
+}
