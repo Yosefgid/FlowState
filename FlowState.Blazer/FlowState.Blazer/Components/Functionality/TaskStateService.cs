@@ -13,11 +13,11 @@ namespace FlowState.Blazer.Components.Functionality
             Http = http;
         }
         public List<ToDoTask> Tasks { get; set; } = new() {
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1").setEndDate(DateTime.Now),
+            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2").setEndDate(DateTime.Now),
+            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3").setEndDate(DateTime.Now),
+            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4").setEndDate(DateTime.Now),
+            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5").setEndDate(DateTime.Now)
         };
 
 
@@ -90,6 +90,27 @@ namespace FlowState.Blazer.Components.Functionality
             }
          
         }
+
+        public readonly Dictionary<string, EisenCat> StringToEisen = new()
+        {
+            { "Do", EisenCat.Do },
+            { "Schedule", EisenCat.Schedule },
+            { "Delegate", EisenCat.Delegate },
+            { "Eliminate", EisenCat.Eliminate }
+        };
+
+        public readonly Dictionary<EisenCat, string> EisenToString = new()
+        {
+            { EisenCat.Eliminate, "Eliminate" },
+            { EisenCat.Delegate, "Delegate" },
+            { EisenCat.Schedule, "Schedule" },
+            { EisenCat.Do, "Do" }
+        };
+
+        public int CatCount(EisenCat cat) => Tasks.Where(x => x.Category == cat).Count();
+
+
+        public int CompletedCatCount(EisenCat cat) => Tasks.Where(x => x.Category == cat && x.IsCompleted).Count();
     }
 
 }
