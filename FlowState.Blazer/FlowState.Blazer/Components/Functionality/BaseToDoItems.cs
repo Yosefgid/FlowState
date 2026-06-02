@@ -85,6 +85,13 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 Console.WriteLine(task.Description);
             }
+            Console.WriteLine("Tasks");
+
+        }
+
+        public void OrderTodos()
+        {
+            todos = todos.OrderBy(x => x.Name).ToList();
         }
         protected void SetFilter(Filter filter)
         {
@@ -135,12 +142,13 @@ namespace FlowState.Blazer.Components.Functionality
                 Console.WriteLine("Pressed");
                 ToDoTask task = new(name?.Trim(), description?.Trim(), "N/A");
                 todos.Add(task);
+                OrderTodos();
                 description = null;
                 name = null;
                 try
                 {
                     await Http.PostAsJsonAsync("/api/tasks", task);
-
+                    
                 }
                 catch (Exception ex)
                 {

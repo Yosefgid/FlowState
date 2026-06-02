@@ -38,6 +38,16 @@ h1:focus {
     -webkit-overflow-scrolling: touch;
 }
 
+.scroll-column {
+    display: flex;
+    gap: 1rem;
+    overflow-y: scroll;
+    padding: 0.5rem;
+    flex-wrap: nowrap;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
 .module{
     min-height: 400px;
     min-width: 600px;

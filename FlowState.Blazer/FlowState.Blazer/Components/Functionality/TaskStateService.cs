@@ -21,12 +21,19 @@ namespace FlowState.Blazer.Components.Functionality
         };
 
 
+
+
         public async Task RefreshTasks()
         {
             try
             {
                 var response = await Http.GetFromJsonAsync<List<ToDoTask>>("/api/tasks");
-                Tasks = response == null ? Tasks : response;
+                if (response != null)
+                {
+                    Tasks.Clear();
+                    Tasks.AddRange(response);
+                    OrderTasksByName();
+                }
                 //foreach (var task in Tasks)
                 //{
                 //    Console.WriteLine(task.Description);
@@ -36,6 +43,12 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+
+        public void OrderTasksByName()
+        {
+            Tasks = Tasks.OrderBy(x => x.Name).ToList();
         }
 
         public async Task OnCheckedChanged(ToDoTask Todo, bool isChecked , EventCallback<bool> StatusChanged)

@@ -1,6 +1,7 @@
 @using Functionality;
 @using FlowState.Models;
 @inherits BaseEisenhowerMatrix
+@rendermode InteractiveServer
 @page "/eisen"
 
 <div class="eisenhower-matrix">
@@ -14,45 +15,108 @@
         <Badge Style="color: black">@AllTasks.Count task@(AllTasks.Count == 1 ? "" : "s")</Badge>
     </Div>
 
-    <DropContainer TItem="ToDoTask" Items="@AllTasks" ItemsFilter="@((item, dropZone) =>
-        EisenToString.TryGetValue(item.Category, out var zone) && zone == dropZone)"  ItemDropped="@ItemDropped" Flex="Flex.Wrap.Grow.Is1">
-        <ChildContent>
-            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Do] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
-                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Do</Heading>
-            </DropZone>
-            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Schedule] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
-                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Schedule</Heading>
-            </DropZone>
-            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Delegate] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
-                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Delegate</Heading>
-            </DropZone>
-            <DropZone TItem="ToDoTask" Name=@EisenToString[EisenCat.Eliminate] Border="Border.Rounded" Background="Background.Light" Padding="Padding.Is3" Margin="Margin.Is3" Flex="Flex.Grow.Is1">
-                <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Eliminate</Heading>
-            </DropZone>
-        </ChildContent>
-        <ItemTemplate >
-            <Card Shadow="Shadow.Default" Margin="Margin.Is3.OnY">
-                <CardBody>
-                    <div class="task-card @(context.IsCompleted ? "task-done" : "")">                        
-                        <div class="task-card-inner">
-                            <Check TValue="bool"
-                                   Checked="@context.IsCompleted"
-                                   CheckedChanged="@(async (bool isChecked) => await ToggleTask(context, isChecked))"
-                                   Class="task-check" />
-                            <div class="task-text">
-                                <span class="task-name @(context.IsCompleted ? "strikethrough" : "")">@context.Name</span>
-                                @if (!string.IsNullOrWhiteSpace(context.Description))
-                                {
-                                    <span class="task-desc">@context.Description</span>
-                                }
+    <!-- Y-axis label -->
+    <Div class="axis-label axis-y">
+        <Span>URGENT →</Span>
+    </Div>
+
+    <Div Class ="matrix-axis-wrapper">
+
+        
+        <Div Class="matrix-col-labels">
+            <Span Class="axis-chip important">⚡ Important</Span>
+            <Span Class="axis-chip not-important">Not Important</Span>
+        </Div>
+
+        <Div Style="display:flex; ">
+
+            <Div Class="matrix-row-labels">
+                <Span Class="axis-chip urgent">🔥 Urgent</Span>
+                <Span Class="axis-chip not-urgent">Not Urgent</Span>
+            </Div>
+
+                <DropContainer Class="matrix-grid" TItem="ToDoTask" Items="@TaskState.Tasks" 
+                ItemsFilter="@((item, dropZone) => EisenToString[item.Category]== dropZone)" ItemDropped="@ItemDropped">
+                <ChildContent>
+                    <DropZone Class ="quadrant q1 " TItem="ToDoTask" Name=@EisenToString[EisenCat.Do] Border="Border.Rounded" Flex="Flex.Grow.Is1">
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Do</Heading>   
+                            <Badge Style="background-color:crimson">
+                                @CatCount(EisenCat.Do) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Do))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
+                    </DropZone>
+                    <DropZone Class ="quadrant q2" TItem="ToDoTask" Name=@EisenToString[EisenCat.Schedule] Border="Border.Rounded" Flex="Flex.Grow.Is1">
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Schedule</Heading>
+                            <Badge Style="background-color:blue">
+                                @CatCount(EisenCat.Schedule) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Schedule))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
+                    </DropZone>
+                    <DropZone Class ="quadrant q3"TItem="ToDoTask" Name=@EisenToString[EisenCat.Delegate] Border="Border.Rounded" Flex="Flex.Grow.Is1">
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Delegate</Heading>
+                            <Badge Style="background-color:darkorange" >
+                                @CatCount(EisenCat.Delegate) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Delegate))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
+                    </DropZone>
+                    <DropZone Class ="quadrant q4"TItem="ToDoTask" Name=@EisenToString[EisenCat.Eliminate] Border="Border.Rounded" Flex="Flex.Grow.Is1">
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Eliminate</Heading>
+                            <Badge Style="background-color:black">
+                                @CatCount(EisenCat.Eliminate) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Eliminate))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
+                    </DropZone>
+                </ChildContent>
+                <ItemTemplate >                
+                    <Card Shadow="Shadow.Default" Margin="Margin.Is3.OnY">
+                        <CardBody>
+                            <div class="task-card @(context.IsCompleted ? "task-done" : "")">                        
+                                <div class="task-card-inner">
+                                    <Check TValue="bool"
+                                           Value="@context.IsCompleted"
+                                           ValueChanged="@(async (bool isChecked) => await ToggleTask(context, isChecked))"
+                                           Class="task-check" />
+                                    <div class="task-text">
+                                            <Span Class="task-name">@context.Name</Span>
+                                        @if (!string.IsNullOrWhiteSpace(context.Description))
+                                        {
+                                            <span class="task-desc">@context.Description</span>
+                                        }
+                                    </div>
+                                    <span class="drag-handle">⠿</span>
+                                </div>
                             </div>
-                            <span class="drag-handle">⠿</span>
-                        </div>
-                    </div>
-                </CardBody>
-            </Card>
-        </ItemTemplate> 
-    </DropContainer>
+                        </CardBody>
+                    </Card>
+                </ItemTemplate> 
+            </DropContainer>
+            </Div>    
+        
+        </Div>
+
+    <Div Class="axis-label axis-x">
+        <Span>IMPORTANCE →</Span>
+    </Div>
 
 </div>
 
@@ -60,24 +124,27 @@
     /* ── Layout ──────────────────────────────────────────────────────────────── */
     .eisenhower-matrix {
         font-family: inherit;
-        margin-right: 50px;
-        margin-bottom: 50px;
+        margin-inline:20px;
     }
 
     .matrix-axis-wrapper {
         position: relative;
-        padding-left: 2rem;
+        
         padding-bottom: 1.75rem;
+        
     }
-
+    
     .matrix-grid {
         display: grid;
         grid-template-columns: 5rem 1fr 1fr;
         grid-template-rows: auto 1fr 1fr;
         gap: 0.75rem;
+        height: 700px;
+        
     }
 
     /* ── Axis labels ─────────────────────────────────────────────────────────── */
+
     .axis-label {
         position: absolute;
         font-size: 0.65rem;
@@ -88,17 +155,22 @@
     }
 
     .axis-y {
-        left: -0.25rem;
+        left: 260px;
         top: 50%;
         transform: translateX(-50%) translateY(-50%) rotate(-90deg);
         white-space: nowrap;
+        margin-right: 10px;
     }
 
     .axis-x {
         bottom: 0;
-        left: 50%;
+        left: 55%;
         transform: translateX(-50%);
         white-space: nowrap;
+    }
+
+    .axis-y, .axis-x {
+        transition: opacity 0.2s ease;
     }
 
     /* ── Header chips ────────────────────────────────────────────────────────── */
@@ -109,62 +181,137 @@
         justify-content: center;
     }
 
+    /* ── Column headers (Important / Not Important) ──────────────────────────── */
+    .matrix-col-labels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        margin-left: 50px;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+        .matrix-col-labels .axis-chip {
+            text-align: center;
+        }
+
+        
+    /* ── Row labels + grid side by side ─────────────────────────────────────── */
+    .matrix-row-labels {
+        display: grid;
+        grid-template-rows: 1fr 1fr;
+        width: 50px;
+        gap: 0.75rem;
+        
+    }
+
+        .matrix-row-labels .axis-chip {
+            transform: rotate(-90deg);
+            white-space: nowrap;
+            width: max-content;
+            align-self: center;
+            text-align: center;
+        }
+
+    /* ── Row headers (Urgent / Not Urgent) ───────────────────────────────────── */
+    
+
+        
+
+    /* ── The 2x2 drop grid ───────────────────────────────────────────────────── */
+    .matrix-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 0.75rem;
+        flex: 1;
+    }
+
+    /* ── Axis chips ──────────────────────────────────────────────────────────── */
     .axis-chip {
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: .06em;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: .08em;
         padding: 0.2rem 0.65rem;
         border-radius: 999px;
+        text-transform: uppercase;
     }
-    
-    .axis-chip.important    { background: rgba(239,68,68,.15);  color: #f87171; text-align: center; }
-    .axis-chip.not-important{ background: rgba(107,114,128,.15); color: #9ca3af; text-align: center; }
-    .axis-chip.urgent       { background: rgba(239,68,68,.15);  color: #f87171; text-align: center;}
-    .axis-chip.not-urgent   { background: rgba(107,114,128,.15); color: #9ca3af; text-align: center; }
+
+        .axis-chip.important {
+            background: rgba(239,68,68,.15);
+            color: #f87171;
+            text-align: center;
+        }
+
+        .axis-chip.not-important {
+            background: rgba(107,114,128,.15);
+            color: #9ca3af;
+            text-align: center;
+        }
+
+        .axis-chip.urgent {
+            background: rgba(239,68,68,.15);
+            color: #f87171;
+            text-align: center;
+            margin-left: -2rem;
+        }
+
+        .axis-chip.not-urgent {
+            background: rgba(107,114,128,.15);
+            color: #9ca3af;
+            text-align: center;
+            margin-left: -2.5rem;
+        }
 
     /* ── Quadrants ───────────────────────────────────────────────────────────── */
     .quadrant {
         border-radius: 0.75rem;
-        padding: 0.75rem;
-        min-height: 200px;
+        min-height: 0;
         transition: box-shadow 0.15s, background 0.15s;
         display: flex;
         flex-direction: column;
         gap: 0.5rem;
+        overflow-y: auto;   /* scroll when content overflows */
+        padding: 1rem;
     }
 
-    .q1 { background: rgba(239, 68,  68,  0.07); border: 1px solid rgba(239,68,68,0.2); }
-    .q2 { background: rgba( 34,211,238,  0.07); border: 1px solid rgba(34,211,238,0.2); }
-    .q3 { background: rgba(251,191, 36,  0.07); border: 1px solid rgba(251,191,36,0.2); }
-    .q4 { background: rgba(107,114,128,  0.07); border: 1px solid rgba(107,114,128,0.2); }
-
-    .quadrant.drag-over {
-        box-shadow: 0 0 0 2px rgba(167,139,250,0.6);
-        background: rgba(167,139,250,0.1);
-    }
-
-    /* ── Quadrant header ─────────────────────────────────────────────────────── */
     .quadrant-header {
         display: flex;
         justify-content: space-between;
-        align-items: center;
-        margin-bottom: 0.25rem;
+        align-items: center;    
     }
 
-    .q-label {
-        font-size: 0.65rem;
-        font-weight: 700;
-        letter-spacing: .1em;
-        color: #9ca3af;
+
+    /* Do — Important + Urgent */
+    .q1 {
+        background: rgba(239, 68, 68, 0.07);
+        border: 1px solid rgba(239,68,68,0.2);
     }
+
+    /* Schedule — Important + Not Urgent */
+    .q2 {
+        background: rgba(34, 211, 238, 0.07);
+        border: 1px solid rgba(34,211,238,0.2);
+    }
+
+    /* Delegate — Not Important + Urgent */
+    .q3 {
+        background: rgba(251, 191, 36, 0.07);
+        border: 1px solid rgba(251,191,36,0.2);
+    }
+
+    /* Eliminate — Not Important + Not Urgent */
+    .q4 {
+        background: rgba(107, 114, 128, 0.07);
+        border: 1px solid rgba(107,114,128,0.2);
+    }
+
+   
+
+    /* ── Quadrant header ─────────────────────────────────────────────────────── */
+    
 
     /* ── Task list ───────────────────────────────────────────────────────────── */
-    .task-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-        flex: 1;
-    }
+    
 
     .empty-hint {
         flex: 1;
@@ -190,14 +337,18 @@
         user-select: none;
     }
 
-    .task-card:hover {
-        background: rgba(255,255,255,0.08);
-        transform: translateY(-1px);
-    }
+        .task-card:hover {
+            background: rgba(255,255,255,0.08);
+            transform: translateY(-1px);
+        }
 
-    .task-card:active { cursor: grabbing; }
+        .task-card:active {
+            cursor: grabbing;
+        }
 
-    .task-card.task-done { opacity: 0.45; }
+        .task-card.task-done {
+            opacity: 0.45;
+        }
 
     .task-card-inner {
         display: flex;
@@ -205,7 +356,10 @@
         gap: 0.5rem;
     }
 
-    .task-check { margin-top: 2px; flex-shrink: 0; }
+    .task-check {
+        margin-top: 2px;
+        flex-shrink: 0;
+    }
 
     .task-text {
         flex: 1;
@@ -224,10 +378,10 @@
         text-overflow: ellipsis;
     }
 
-    .task-name.strikethrough {
-        text-decoration: line-through;
-        color: #6b7280;
-    }
+        .task-name.strikethrough {
+            text-decoration: line-through;
+            color: #6b7280;
+        }
 
     .task-desc {
         font-size: 0.7rem;
@@ -245,5 +399,9 @@
         margin-top: 1px;
     }
 
-    .task-card:hover .drag-handle { color: #9ca3af; }
+    .task-card:hover .drag-handle {
+        color: #9ca3af;
+    }
+
+
 </style>
