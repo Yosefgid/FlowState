@@ -1,14 +1,22 @@
 ﻿@using FlowState.Models
 @using System.Net.Http.Json
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <div class="google-calendar">
     <div class="calendar-toolbar">
-        <button class="nav-button" @onclick="PreviousMonth">‹</button>
+        <div class="calendar-toolbar-left">
+            <button class="nav-button" @onclick="PreviousMonth">‹</button>
 
-        <h2>@currentMonth.ToString("MMMM yyyy")</h2>
+            <h2>@currentMonth.ToString("MMMM yyyy")</h2>
 
-        <button class="nav-button" @onclick="NextMonth">›</button>
+            <button class="nav-button" @onclick="NextMonth">›</button>
+        </div>
+
+        <button class="google-connect-button @(isGoogleConnected ? "connected" : "")"
+                @onclick="ConnectGoogleCalendar">
+            @(isGoogleConnected ? "Import Google Calendar Events" : "Connect to Google Calendar")
+        </button>
     </div>
 
     <div class="calendar-weekdays">
@@ -60,17 +68,24 @@
         height: 64px;
         display: flex;
         align-items: center;
-        gap: 16px;
+        justify-content: space-between;
         padding: 0 20px;
         border-bottom: 1px solid #dadce0;
+        background: #fff;
     }
 
-        .calendar-toolbar h2 {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 400;
-            color: #3c4043;
-        }
+    .calendar-toolbar-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .calendar-toolbar h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 400;
+        color: #3c4043;
+    }
 
     .nav-button {
         width: 36px;
@@ -86,6 +101,27 @@
 
         .nav-button:hover {
             background: #f1f3f4;
+        }
+
+    .google-connect-button {
+        border: 1px solid #dadce0;
+        background: white;
+        color: #1a73e8;
+        border-radius: 999px;
+        padding: 8px 14px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+        .google-connect-button:hover {
+            background: #f1f3f4;
+        }
+
+        .google-connect-button.connected {
+            color: #188038;
+            border-color: #188038;
+            background: #e6f4ea;
         }
 
     .calendar-weekdays {
@@ -190,6 +226,8 @@
 @code {
     private List<ToDoTask> tasks = new();
 
+    private bool isGoogleConnected;
+
     private DateTime currentMonth = new DateTime(
         DateTime.Today.Year,
         DateTime.Today.Month,
@@ -197,6 +235,12 @@
     );
 
     protected override async Task OnInitializedAsync()
+    {
+        await LoadGoogleStatus();
+        await LoadTasks();
+    }
+
+    private async Task LoadTasks()
     {
         var result = await Http.GetFromJsonAsync<List<ToDoTask>>("api/calendar");
 
@@ -206,12 +250,33 @@
         }
     }
 
+    private async Task LoadGoogleStatus()
+    {
+        var result = await Http.GetFromJsonAsync<GoogleStatusResponse>("api/google-tasks/status");
+
+        if (result is not null)
+        {
+            isGoogleConnected = result.IsConnected;
+        }
+    }
+
+    private async Task ConnectGoogleCalendar()
+    {
+        if (isGoogleConnected)
+        {
+            await Http.PostAsync("api/google-tasks/import", null);
+            await LoadTasks();
+            return;
+        }
+
+        Navigation.NavigateTo("http://localhost:5170/api/google-tasks/connect", forceLoad: true);
+    }
+
     private IEnumerable<DateTime> CalendarDays
     {
         get
         {
             var firstDayOfMonth = currentMonth;
-
             var startOffset = ((int)firstDayOfMonth.DayOfWeek + 6) % 7;
             var calendarStart = firstDayOfMonth.AddDays(-startOffset);
 
@@ -235,5 +300,10 @@
     private void NextMonth()
     {
         currentMonth = currentMonth.AddMonths(1);
+    }
+
+    private class GoogleStatusResponse
+    {
+        public bool IsConnected { get; set; }
     }
 }

@@ -14,6 +14,16 @@ namespace FlowState.Controllers
             _googleService = googleService;
         }
 
+        [HttpGet("status")]
+        public async Task<IActionResult> Status()
+        {
+            var userId = GetLocalUserId();
+
+            var isConnected = await _googleService.IsGoogleCalendarConnectedAsync(userId);
+
+            return Ok(new { isConnected });
+        }
+
         [HttpGet("connect")]
         public IActionResult Connect()
         {
@@ -29,7 +39,7 @@ namespace FlowState.Controllers
         {
             await _googleService.ConnectGoogleCalendarAsync(code, state);
 
-            return Ok("Google Calendar connected successfully.");
+            return Redirect("http://localhost:5270/calendar");
         }
 
         [HttpPost("import")]
