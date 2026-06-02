@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @inject TaskStateService TaskState
+
 @rendermode InteractiveServer
 <div class="dashboard">
 
@@ -65,7 +66,12 @@
                               @onclick="() => ToEisen()">
 
                             <CardBody Class="module">
-
+                                <Div class="mini-grid">
+                                    <Div Style="background-color: orangered;">@TaskState.CatCount(EisenCat.Do)</Div>
+                                    <Div Style="background-color: dodgerblue">@TaskState.CatCount(EisenCat.Schedule)</Div>
+                                    <Div Style="background-color: darkorange">@TaskState.CatCount(EisenCat.Delegate)</Div>
+                                    <Div Style="background-color: gray">@TaskState.CatCount(EisenCat.Eliminate)</Div>
+                                </Div>
                             </CardBody>
 
                         </Card>
@@ -124,25 +130,32 @@
                 <CardHeader>
                     <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
                         <CardTitle>Today's Tasks</CardTitle>
-                        <Badge Color="Color.Info">@DailyTasks.Count(t => !t.IsCompleted) remaining</Badge>
+                        <Badge Style="background-color:darkblue">@DailyTasks.Count(t => !t.IsCompleted) remaining</Badge>
                     </Div>
                 </CardHeader>
                 <CardBody Class="p-0 scroll-column">
-                    <ListGroup Flush>
+                    <ListGroup Flush Class="w-100">
                         @foreach (var task in DailyTasks)
                         {
                             <ListGroupItem Class="@($"task-item {(task.IsCompleted ? "done" : "")}")">
                                 <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is3">
                                     <Check TValue="bool"
-                                           Checked="@task.IsCompleted"
-                                           CheckedChanged="@(() => ToggleTask(task))" />
+                                           Value="@task.IsCompleted"
+                                           ValueChanged="@(async (bool isChecked) => await ToggleTask(task, isChecked))" />
                                     <Div>
-                                        <Text Class="@($"task-name {(task.IsCompleted ? "text-decoration-line-through text-muted" : "")}")">
-                                            @task.Name
-                                        </Text>
+                                        <Div Flex="Flex.Column">
+                                            <Text Class="@($"task-name {(task.IsCompleted ? "text-decoration-line-through text-muted" : "")}")">
+                                                @task.Name
+                                            </Text>
+                                            <Text Class="@($"task-desc {(task.IsCompleted ? "text-decoration-line-through text-muted" : "")}")">
+                                                @task.Description
+                                            </Text>
+                                        </Div>
                                         <Div Flex="Flex.AlignItems.Center" Gap="Gap.Is2" Class="mt-1">
-                                            @* <Badge Color="Color.Secondary" Class="tag-badge">@task.Tag</Badge>
-                                            <Badge Color="@PriorityColor(task.Priority)">@task.Priority</Badge> *@
+                                            <Badge Style="@(task.IsCompleted ? "background-color: darkgreen" : "background-color: blue")" Class="tag-badge">@(task.IsCompleted ? "Completed" : "Active")</Badge>
+                                            <Badge Style="@PriorityColor(task.Category)">
+                                                @TaskState.EisenToString[task.Category]
+                                                </Badge>
                                         </Div>
                                     </Div>
                                 </Div>
@@ -197,12 +210,7 @@
         Tasks = TaskState.Tasks;
 
         DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
-    }
-
-    private void ToEisen()
-    {
-        Navigation.NavigateTo($"/eisen");
-    }
+    }   
 
     // ── Session edit ──────────────────────────────────────────────────────────
     private string selectedRange = "Session0";
@@ -226,7 +234,18 @@
     private double BarHeight(int val) => (val / (double)MaxVal) * 100;
 
     // ── Tasks ────────────────────────────────────────────────────────────────
-    private List<ToDoTask> DailyTasks { get; set; } = new();
+    private List<ToDoTask> DailyTasks { get; set; } = new(){
+            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
+            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
+            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
+            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
+            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5"),
+            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
+            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
+            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
+            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
+            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+        };
 
     // ── Sessions ─────────────────────────────────────────────────────────────
     private readonly List<SessionItem> Sessions = new()
@@ -245,13 +264,28 @@
         new("Session2",      95,   120, "purple"),
     };
 
-    private void ToggleTask(ToDoTask t) => t.IsCompleted = !t.IsCompleted;
-
-    private Color PriorityColor(string p) => p switch
+    private async Task ToggleTask(ToDoTask task, bool isChecked)
     {
-        "High" => Color.Danger,
-        "Medium" => Color.Warning,
-        _ => Color.Success
+        task.IsCompleted = isChecked;
+
+        await TaskState.OnCheckedChanged(task, isChecked);
+
+
+        await InvokeAsync(StateHasChanged);
+
+    }
+
+    private void ToEisen()
+    {
+        Navigation.NavigateTo($"/eisen");
+    }
+
+    private string PriorityColor(EisenCat cat) => cat switch
+    {
+        EisenCat.Do => "background-color: red",
+        EisenCat.Schedule => "background-color: blue",
+        EisenCat.Eliminate => "background-color: gray",
+        _ => "background-color: darkorange"
     };
 
     private string GetTasksDone(List<ToDoTask> ts)

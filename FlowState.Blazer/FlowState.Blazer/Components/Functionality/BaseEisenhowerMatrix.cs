@@ -21,21 +21,7 @@ namespace FlowState.Blazer.Components.Functionality
 
         public List<ToDoTask> Tasks { get; set; } = new();
 
-        public readonly Dictionary<string, EisenCat> StringToEisen = new()
-        {
-            { "Do", EisenCat.Do },
-            { "Schedule", EisenCat.Schedule },
-            { "Delegate", EisenCat.Delegate },
-            { "Eliminate", EisenCat.Eliminate }
-        };
-
-        public readonly Dictionary<EisenCat, string> EisenToString = new()
-        {
-            { EisenCat.Eliminate, "Eliminate" },
-            { EisenCat.Delegate, "Delegate" },
-            { EisenCat.Schedule, "Schedule" },
-            { EisenCat.Do, "Do" }
-        };
+        
 
 
 
@@ -67,17 +53,14 @@ namespace FlowState.Blazer.Components.Functionality
         protected List<ToDoTask> AllTasks => Tasks;
 
 
-        protected int CatCount(EisenCat cat) => TaskState.Tasks.Where(x => x.Category == cat).Count();
-
-
-        protected int CompletedCatCount(EisenCat cat) => TaskState.Tasks.Where(x => x.Category == cat && x.IsCompleted).Count();
+       
 
 
         // ── Drag & drop ──────────────────────────────────────────────────────────
 
         public async Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
-            dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
+            dropItem.Item.Category = TaskState.StringToEisen[dropItem.DropZoneName];
             TaskState.OrderTasksByName();
 
             await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
