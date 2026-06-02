@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -93,54 +94,72 @@ public class UsersControllerIntegrationTests
 
     }
 
-    //Authenticated tests with helper function 
-    private async Task<string> GetTokenAsync()
+    //Authenticated tests with helper function
+
+    // Registers a user and returns its token plus the id baked into the token's "sub" claim
+
+    private async Task<(string Token, int UserId)> RegisterAndGetTokenAsync(
+        string username = "karl", string email = "karl@email.com")
     {
         var registerBody = JsonSerializer.Serialize(new
         {
-            username = "alice",
-            email = "alice@test.com",
+            username,
+            email,
             password = "Testpassword1!",
             confirmPassword = "Testpassword1!"
         });
 
         var registerResponse = await _client.PostAsync("/api/auth/register",
             new StringContent(registerBody, Encoding.UTF8, "application/json"));
-
         var json = await registerResponse.Content.ReadAsStringAsync();
-        var jsonDocObj = JsonDocument.Parse(json);
-        return jsonDocObj.RootElement.GetProperty("token").GetString()!;
+        var token = JsonDocument.Parse(json).RootElement.GetProperty("token").GetString()!;
+        var jwt = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        var sub = jwt.Claims.First(c => c.Type == "sub").Value;
+
+        return (token, int.Parse(sub));
+
+
     }
 
+    private void Authenticate(string token) =>  _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
+
+  
     [Test]
-    public async Task GetAllUser_WithToken_Returns200()
+    public async Task GetAllUser_WithToken_Returns403_NoRoleSystemYet()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var (token, _) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
         var response = await _client.GetAsync("/api/users");
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-
-
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
     }
     [Test]
-    public async Task GetUserById_WithToken_Returns404_WhenUserDoesNotExist()
+    public async Task GetUserById_WithToken_Returns200_ForOwnProfile()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Assert.That(id, Is.GreaterThan(0));
+        Authenticate(token);
 
-        var response = await _client.GetAsync("/api/users/900");
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+        var response = await _client.GetAsync($"/api/users/{id}");
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    }
+
+    [Test]
+    public async Task GetUserById_WithToken_Returns403_ForAnotherUser()
+    {
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
+        var response = await _client.GetAsync($"/api/users/{id + 1}");
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
     }
 
     [Test]
     public async Task CreateUser_WithToken_Returns201()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var (token, _) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
 
         var body = JsonSerializer.Serialize(new
         {
@@ -152,40 +171,76 @@ public class UsersControllerIntegrationTests
             new StringContent(body, Encoding.UTF8, "application/json"));
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
     }
-    [Test]
-    public async Task UpdateUser_WithToken_Returns404_WhenUserDoesNotExist()
-    {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
 
-        var body = JsonSerializer.Serialize(new { email = "notauser@test.com" });
-        var response = await _client.PutAsync("/api/users/900",
+    [Test]
+    public async Task UpdateUser_WithToken_Returns200_ForOwnProfile()
+    {
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
+        var body = JsonSerializer.Serialize(new { email = "updated@test.com" });
+        var response = await _client.PutAsync($"/api/users/{id}",
             new StringContent(body, Encoding.UTF8, "application/json"));
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
     }
-    [Test]
-    public async Task DeleteUser_WithToken_Returns404_WhenUserDoesNotExist()
-    {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
 
-        var response = await _client.DeleteAsync("/api/users/99999");
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-    }
     [Test]
-    public async Task ChangeUsername_WithToken_Returns404_WhenUserDoesNotExist()
+    public async Task UpdateUser_WithToken_Returns403_ForAnotherUser()
     {
-        var token = await GetTokenAsync();
-        _client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", token);
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
 
-        var body = JsonSerializer.Serialize(new { newUsername = "newname" });
-        var response = await _client.PatchAsync("/api/users/99999/username",
+        var body = JsonSerializer.Serialize(new { email = "notyours@test.com" });
+        var response = await _client.PutAsync($"/api/users/{id + 1}",
             new StringContent(body, Encoding.UTF8, "application/json"));
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
     }
+
+    [Test]
+    public async Task DeleteUser_WithToken_Returns204_ForOwnAccount()
+    {
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
+        var response = await _client.DeleteAsync($"/api/users/{id}");
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.NoContent));
+    }
+
+    [Test]
+    public async Task DeleteUser_WithToken_Returns403_ForAnotherUser()
+    {
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
+        var response = await _client.DeleteAsync($"/api/users/{id + 1}");
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+    }
+
+    [Test]
+    public async Task ChangeUsername_WithToken_Returns200_ForOwnAccount()
+    {
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
+        var body = JsonSerializer.Serialize(new { newUsername = "aliceupdated" });
+        var response = await _client.PatchAsync($"/api/users/{id}/username",
+            new StringContent(body, Encoding.UTF8, "application/json"));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+    }
+
+    [Test]
+    public async Task ChangeUsername_WithToken_Returns403_ForAnotherUser()
+    {
+        var (token, id) = await RegisterAndGetTokenAsync();
+        Authenticate(token);
+
+        var body = JsonSerializer.Serialize(new { newUsername = "notyours" });
+        var response = await _client.PatchAsync($"/api/users/{id + 1}/username",
+            new StringContent(body, Encoding.UTF8, "application/json"));
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
+    }
+
+
 
 
 
