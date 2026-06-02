@@ -127,7 +127,7 @@
                         <Badge Color="Color.Info">@DailyTasks.Count(t => !t.IsCompleted) remaining</Badge>
                     </Div>
                 </CardHeader>
-                <CardBody Class="p-0">
+                <CardBody Class="p-0 scroll-column">
                     <ListGroup Flush>
                         @foreach (var task in DailyTasks)
                         {
@@ -196,12 +196,7 @@
         await TaskState.RefreshTasks();
         Tasks = TaskState.Tasks;
 
-        foreach (var task in TaskState.Tasks)
-        {
-            Console.WriteLine(task.Description);
-        }
-
-        Console.WriteLine("DASHBOARD");
+        DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
     }
 
     private void ToEisen()
@@ -218,9 +213,9 @@
     private List<(string Title, string Value, string Change, bool Positive, IconName Icon, string Accent)> Stats => new()
     {
         ("Focus Hours",  "32.5h",   "+12%",   true,  IconName.Clock,       "cyan"),
-        ("Tasks Done",   GetTasksDone(), "+8%", true,  IconName.CheckSquare, "green"),
+        ("Tasks Done",   GetTasksDone(Tasks), "+8%", true,  IconName.CheckSquare, "green"),
         ("Streak",       "14 days", "New PR", true,  IconName.Fire,        "orange"),
-        ("Today's Tasks", GetTasksDone(), "-0.3", false, IconName.Star, "purple"),
+        ("Today's Tasks", GetTasksDone(DailyTasks), "-0.3", false, IconName.Star, "purple"),
     };
 
     // ── Bar chart data ───────────────────────────────────────────────────────
@@ -231,14 +226,7 @@
     private double BarHeight(int val) => (val / (double)MaxVal) * 100;
 
     // ── Tasks ────────────────────────────────────────────────────────────────
-    private List<ToDoTask> DailyTasks = new()
-    {
-        new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-        new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-        new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-        new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-        new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
-    };
+    private List<ToDoTask> DailyTasks { get; set; } = new();
 
     // ── Sessions ─────────────────────────────────────────────────────────────
     private readonly List<SessionItem> Sessions = new()
@@ -266,12 +254,12 @@
         _ => Color.Success
     };
 
-    private string GetTasksDone()
+    private string GetTasksDone(List<ToDoTask> ts)
     {
-        if (Tasks == null || Tasks.Count == 0)
+        if (ts == null || ts.Count == 0)
             return "0/0";
 
-        return $"{Tasks.Count(x => x.IsCompleted)}/{Tasks.Count}";
+        return $"{ts.Count(x => x.IsCompleted)}/{ts.Count}";
     }
 
     record SessionItem(string Name, string Start, string End, double Score, string Color);

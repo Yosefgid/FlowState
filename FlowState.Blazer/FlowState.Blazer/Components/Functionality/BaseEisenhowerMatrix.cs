@@ -67,23 +67,34 @@ namespace FlowState.Blazer.Components.Functionality
         protected List<ToDoTask> AllTasks => Tasks;
 
 
+        protected int CatCount(EisenCat cat) => TaskState.Tasks.Where(x => x.Category == cat).Count();
+
+
+        protected int CompletedCatCount(EisenCat cat) => TaskState.Tasks.Where(x => x.Category == cat && x.IsCompleted).Count();
+
 
         // ── Drag & drop ──────────────────────────────────────────────────────────
 
         public async Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
             dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
+            TaskState.OrderTasksByName();
 
-            //await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
+            await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────
 
 
-        protected async Task ToggleTask(ToDoTask task, bool isChecked)
+        public async Task ToggleTask(ToDoTask task, bool isChecked)
         {
             Console.WriteLine("DO SOMETHING");
-            await TaskState.OnCheckedChanged(task,  isChecked);
+
+            task.IsCompleted = isChecked;
+           
+           await TaskState.OnCheckedChanged(task,  isChecked);
+
+
             await InvokeAsync(StateHasChanged);
         }
         

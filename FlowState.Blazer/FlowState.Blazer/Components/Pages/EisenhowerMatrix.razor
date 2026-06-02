@@ -39,16 +39,52 @@
                 ItemsFilter="@((item, dropZone) => EisenToString[item.Category]== dropZone)" ItemDropped="@ItemDropped">
                 <ChildContent>
                     <DropZone Class ="quadrant q1 " TItem="ToDoTask" Name=@EisenToString[EisenCat.Do] Border="Border.Rounded" Flex="Flex.Grow.Is1">
-                        <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Do</Heading>                    
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Do</Heading>   
+                            <Badge Style="background-color:crimson">
+                                @CatCount(EisenCat.Do) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Do))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
                     </DropZone>
                     <DropZone Class ="quadrant q2" TItem="ToDoTask" Name=@EisenToString[EisenCat.Schedule] Border="Border.Rounded" Flex="Flex.Grow.Is1">
-                        <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Schedule</Heading>                   
-                        </DropZone>
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Schedule</Heading>
+                            <Badge Style="background-color:blue">
+                                @CatCount(EisenCat.Schedule) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Schedule))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
+                    </DropZone>
                     <DropZone Class ="quadrant q3"TItem="ToDoTask" Name=@EisenToString[EisenCat.Delegate] Border="Border.Rounded" Flex="Flex.Grow.Is1">
-                        <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Delegate</Heading>                    
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Delegate</Heading>
+                            <Badge Style="background-color:darkorange" >
+                                @CatCount(EisenCat.Delegate) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Delegate))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
                     </DropZone>
                     <DropZone Class ="quadrant q4"TItem="ToDoTask" Name=@EisenToString[EisenCat.Eliminate] Border="Border.Rounded" Flex="Flex.Grow.Is1">
-                        <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Eliminate</Heading>
+                        <Div Class="quadrant-header">
+                            <Heading Size="HeadingSize.Is4" Margin="Margin.Is3.FromBottom">Eliminate</Heading>
+                            <Badge Style="background-color:black">
+                                @CatCount(EisenCat.Eliminate) Tasks
+                            </Badge>
+                        </Div>
+                        @if (!TaskState.Tasks.Any(x => x.Category == EisenCat.Eliminate))
+                        {
+                            <Div Class="empty-hint">Drop tasks here</Div>
+                        }
                     </DropZone>
                 </ChildContent>
                 <ItemTemplate >                
@@ -88,12 +124,12 @@
     /* ── Layout ──────────────────────────────────────────────────────────────── */
     .eisenhower-matrix {
         font-family: inherit;
-        margin: 50px;
+        margin-inline:20px;
     }
 
     .matrix-axis-wrapper {
         position: relative;
-        padding-left: 2rem;
+        
         padding-bottom: 1.75rem;
         
     }
@@ -236,6 +272,12 @@
         gap: 0.5rem;
         overflow-y: auto;   /* scroll when content overflows */
         padding: 1rem;
+    }
+
+    .quadrant-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;    
     }
 
 
