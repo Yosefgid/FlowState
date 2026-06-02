@@ -16,6 +16,9 @@ namespace FlowState.Blazer.Components.Functionality
         [Inject]
         protected TaskStateService TaskState { get; set; } = default!;
 
+        [Inject]
+        protected HttpClient Http { get; set; } = default!;
+
         public List<ToDoTask> Tasks { get; set; } = new();
 
         public readonly Dictionary<string, EisenCat> StringToEisen = new()
@@ -31,7 +34,7 @@ namespace FlowState.Blazer.Components.Functionality
             { EisenCat.Eliminate, "Eliminate" },
             { EisenCat.Delegate, "Delegate" },
             { EisenCat.Schedule, "Schedule" },
-            { EisenCat.Do, "Do First" }
+            { EisenCat.Do, "Do" }
         };
 
 
@@ -42,37 +45,56 @@ namespace FlowState.Blazer.Components.Functionality
         {
             // Assign any new tasks that don't yet have a quadrant.
             // Default: DoFirst — caller can pre-assign via OnTaskQuadrantChanged.
-           
+
+
             await TaskState.RefreshTasks();
-
+          
             Tasks = TaskState.Tasks;
+            foreach (var task in TaskState.Tasks)
+            {
+                Console.WriteLine(task.Description);
+            }
+            Console.WriteLine("Eisen");
 
-            Console.WriteLine($"Loaded {Tasks.Count} tasks");
             await InvokeAsync(StateHasChanged);
 
         }
+
+        
 
         // ── Computed helpers ─────────────────────────────────────────────────────
 
         protected List<ToDoTask> AllTasks => Tasks;
 
 
+        protected int CatCount(EisenCat cat) => TaskState.Tasks.Where(x => x.Category == cat).Count();
+
+
+        protected int CompletedCatCount(EisenCat cat) => TaskState.Tasks.Where(x => x.Category == cat && x.IsCompleted).Count();
+
 
         // ── Drag & drop ──────────────────────────────────────────────────────────
 
-        public Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
+        public async Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
             dropItem.Item.Category = StringToEisen[dropItem.DropZoneName];
-            return Task.CompletedTask;
+            TaskState.OrderTasksByName();
+
+            await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────
 
 
-        protected async Task ToggleTask(ToDoTask task, bool isChecked)
+        public async Task ToggleTask(ToDoTask task, bool isChecked)
         {
             Console.WriteLine("DO SOMETHING");
-            await TaskState.OnCheckedChanged(task,  isChecked);
+
+            task.IsCompleted = isChecked;
+           
+           await TaskState.OnCheckedChanged(task,  isChecked);
+
+
             await InvokeAsync(StateHasChanged);
         }
         

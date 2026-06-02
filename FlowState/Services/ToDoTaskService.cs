@@ -22,6 +22,8 @@ namespace FlowState.Services
 
         public void DeleteTasks(List<ToDoTask> tasks);
 
+        public ToDoTask AssignEisen(int id, EisenCat cat);
+
     }
     public class ToDoTaskService : IToDoTaskService
     {
@@ -74,6 +76,11 @@ namespace FlowState.Services
         public void DeleteTasks(List<ToDoTask> tasks)
         {
             _taskRepo.DeleteTasks(tasks);
+        }
+
+        public ToDoTask AssignEisen(int id, EisenCat cat)
+        {
+            return _taskRepo.AssignEisen(id,cat);   
         }
 
 

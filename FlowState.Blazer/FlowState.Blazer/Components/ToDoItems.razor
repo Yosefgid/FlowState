@@ -96,7 +96,7 @@
                         <ListGroup Flush>
                             @foreach (var todo in Todos)
                             {
-                                <ToDoItem Todo="@todo" StatusChanged="@OnTodoStatusChanged" RemoveClicked="@OnRemoveTodo" />
+                                <ToDoItem Todo="@todo" StatusChanged="@OnTodoStatusChanged" RemoveClicked="@OnRemoveTodo" OrderChanged="OrderTodos"/>
                             }
                         </ListGroup>
                     }
