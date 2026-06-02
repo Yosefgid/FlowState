@@ -4,10 +4,15 @@ using Blazorise.Bootstrap5;
 using Blazorise.Icons.FontAwesome;
 using FlowState.Blazer.Components;
 using FlowState.Blazer.Components.Functionality;
+using FlowState.Blazer.Services;
 
 
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<AuthStateServ>();
+
 
 builder.Services
     .AddBlazorise(options =>
