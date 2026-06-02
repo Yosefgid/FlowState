@@ -1,4 +1,9 @@
-﻿<Bar Mode="BarMode.VerticalInline"
+﻿@rendermode InteractiveServer
+@using FlowState.Blazer.Services
+@inject AuthStateServ AuthStateService
+@inject NavigationManager Navigation
+@implements IDisposable
+<Bar Mode="BarMode.VerticalInline"
      CollapseMode="BarCollapseMode.Small"
      ThemeContrast="ThemeContrast.Dark"
      Class="sidebar">
@@ -77,24 +82,87 @@
         <BarEnd>
             <BarItem>
                 <BarLink To="/settings">
-                    <BarIcon IconName="IconName.Bolt" />
+                    <BarIcon IconName="IconName.Settings" />
                     Settings
                 </BarLink>
             </BarItem>
-
-            <!-- User card -->
-            <BarItem>
-                <div class="user-card mt-2">
-                    <Div Class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center avatar-initials">AJ</Div>
-                    <div class="user-info ms-2">
-                        <span class="user-name">Alex Johnson</span>
-                        <span class="user-plan">Pro Plan</span>
+            @if (AuthStateService.IsLoggedIn)
+            {
+                <BarItem>
+                    <div class="user-card mt-2">
+                        <Div Class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center avatar-initials">
+                            @GetInitials()
+                        </Div>
+                        <div class="user-info ms-2">
+                            <span class="user-name">@AuthStateService.Username</span>
+                            <span class="user-plan">@AuthStateService.Email</span>
+                        </div>
                     </div>
-                </div>
-            </BarItem>
+                </BarItem>
+                <BarItem>
+                    <BarLink Clicked="HandleLogout">
+                        <BarIcon IconName="IconName.ArrowRight"/>
+                        Logout
+                    </BarLink>
+                </BarItem>
+
+            }
+            else
+            {
+                <BarItem>
+                    <BarLink To="/login">
+                        <BarIcon IconName="IconName.ArrowRight"/>
+                        Login
+                    </BarLink>
+                </BarItem>
+            }
+           
         </BarEnd>
     </BarMenu>
 
 </Bar>
+
+@code {
+    private bool _initialised = false;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthStateService.InitialiseAsync();
+            AuthStateService.OnAuthStateChanged += OnStateChanged;
+            StateHasChanged();
+
+        }
+        
+    }
+
+    private async Task HandleLogout()
+    {
+        await AuthStateService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+
+    private void OnStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string GetInitials()
+    {
+        if (string.IsNullOrEmpty(AuthStateService.Username))
+            return "?";
+
+        var parts = AuthStateService.Username.Split(' ');
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+
+        return AuthStateService.Username[0].ToString().ToUpper();
+    }
+
+    public void Dispose()
+    {
+        AuthStateService.OnAuthStateChanged -= OnStateChanged;
+    }
+}
 
 
