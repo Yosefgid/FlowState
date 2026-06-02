@@ -19,6 +19,7 @@ public class UsersControllerIntegrationTests
     [SetUp]
     public void Setup()
     {
+        //one db per test, shared acorss requests 
         var dbName = Guid.NewGuid().ToString();
         _factory = new WebApplicationFactory<Program>()
         .WithWebHostBuilder(builder =>
