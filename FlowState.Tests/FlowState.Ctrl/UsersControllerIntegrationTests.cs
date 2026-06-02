@@ -18,6 +18,7 @@ public class UsersControllerIntegrationTests
     [SetUp]
     public void Setup()
     {
+        var dbName = Guid.NewGuid().ToString();
         _factory = new WebApplicationFactory<Program>()
         .WithWebHostBuilder(builder =>
         {
@@ -30,7 +31,7 @@ public class UsersControllerIntegrationTests
                     services.Remove(descriptor);
 
                 services.AddDbContext<MyDbContext>(options =>
-                    options.UseInMemoryDatabase(Guid.NewGuid().ToString()));
+                    options.UseInMemoryDatabase(dbName));
             });
         });
         _client = _factory.CreateClient();
