@@ -17,9 +17,15 @@ namespace FlowState.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetTasks()
+        public IActionResult GetAllTasks()
         {
             return Ok(_taskService.GetAllTasks());
+        }
+
+        [HttpGet("session/{sessionId}")]
+        public IActionResult GetAllTasksBySession(int sessionId)
+        {
+            return Ok(_taskService.GetTasksBySession(sessionId));
         }
 
         [HttpGet("{id}")]
@@ -112,6 +118,8 @@ namespace FlowState.Controllers
             return Ok(updatedTask);
         }
 
+
+        
 
 
 

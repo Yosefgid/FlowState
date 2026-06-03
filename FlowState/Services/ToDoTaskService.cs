@@ -24,6 +24,8 @@ namespace FlowState.Services
 
         public ToDoTask AssignEisen(int id, EisenCat cat);
 
+        public List<ToDoTask> GetTasksBySession(int sessionId);
+
     }
     public class ToDoTaskService : IToDoTaskService
     {
@@ -83,7 +85,10 @@ namespace FlowState.Services
             return _taskRepo.AssignEisen(id,cat);   
         }
 
-
+        public List<ToDoTask> GetTasksBySession(int sessionId)
+        {
+            return _taskRepo.GetTasksBySession(sessionId);
+        }
 
 
     }
