@@ -57,7 +57,7 @@ namespace FlowState.Controllers
         public IActionResult Login([FromBody] LoginDto dto)
         {
             var user = _authServices.Login(dto.Email, dto.Password);
-            if (user == null) return Unauthorized();
+            if (user == null) return Unauthorized(new {message ="Invalid email or password."});
             return Ok(BuildAuthResponse(user));
         }
 
