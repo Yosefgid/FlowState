@@ -1,4 +1,5 @@
 ﻿using FlowState.Blazer.Models.Auth;
+using System.Text.Json;
 
 namespace FlowState.Blazer.Services
 {
@@ -21,8 +22,8 @@ namespace FlowState.Blazer.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                return (false, error);
+                
+                return (false, await ReadErrorAsync(response));
             }
 
             var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
@@ -37,8 +38,7 @@ namespace FlowState.Blazer.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                var error = await response.Content.ReadAsStringAsync();
-                return (false, error);
+                return (false, await ReadErrorAsync(response));
             }
 
             var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
@@ -50,6 +50,20 @@ namespace FlowState.Blazer.Services
         public async Task LogoutAsync()
         {
             await _authStateService.LogoutAsync();
+        }
+
+        private async Task<string> ReadErrorAsync(HttpResponseMessage response)
+        {
+            try
+            {
+                var body = await response.Content.ReadFromJsonAsync<JsonElement>();
+                if (body.TryGetProperty("message", out var msg))
+                {
+                    return msg.GetString() ?? "Something went wrong.";
+                }
+            }
+            catch { }
+            return "Something went wrong.";
         }
     }
 }
