@@ -6,7 +6,6 @@ namespace FlowState.Services
     {
         List<User> GetAllUser();
         User? GetUserById(int id);
-        User? AddUser(User user, string passwordTxt);
         bool DeleteUser(int id);
         User? UpdateUser(int id, User updated);
         User? ChangeUsername(int id, string newUsername);

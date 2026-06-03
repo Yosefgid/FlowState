@@ -39,32 +39,6 @@ namespace FlowState.Controllers
 
         }
 
-        [HttpPost]
-        public IActionResult CreateUser([FromBody] CreateUserDto dto)
-        {
-            if (string.IsNullOrWhiteSpace(dto.Username))
-                return BadRequest("Username is required.");
-
-            if (string.IsNullOrWhiteSpace(dto.Email))
-                return BadRequest("Email is required.");
-
-            if (string.IsNullOrWhiteSpace(dto.Password))
-                return BadRequest("Password is required.");
-
-            var user = new User
-            {
-                Username = dto.Username,
-                Email = dto.Email
-            };
-
-            var created = _userServices.AddUser(user, dto.Password);
-
-            if (created == null)
-                return BadRequest("Could not create user. Username or email may already be taken.");
-
-            return CreatedAtAction(nameof(GetUserById), new { id = created.Id }, created);
-        }
-
         [HttpPut("{id}")]
         public IActionResult UpdateUser(int id, [FromBody] UpdateUserDto dto)
         {
