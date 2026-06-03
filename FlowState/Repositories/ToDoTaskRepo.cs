@@ -21,6 +21,8 @@ namespace FlowState.Repositories
         public void DeleteTasks(List<ToDoTask> tasks);
 
         public ToDoTask AssignEisen(int id, EisenCat cat);
+
+        public List<ToDoTask> GetTasksBySession(int sessionId);
     }
     public class ToDoTaskRepo : IToDoTaskRepo
     {
@@ -151,6 +153,15 @@ namespace FlowState.Repositories
             return task;
         }
 
+        public List<ToDoTask> GetTasksBySession(int sessionId)
+        {
+            var existingSession = _dbContext.Sessions.FirstOrDefault(s => s.Id == sessionId);
+
+            if (existingSession == null)
+                return null;
+
+            return _dbContext.Tasks.Where(y => y.SessionId == sessionId).ToList();
+        }
 
         
 
