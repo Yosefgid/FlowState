@@ -61,15 +61,6 @@ public class UsersControllerIntegrationTests
     }
 
     [Test]
-    public async Task CreateUser_NoToken_Returns401()
-    {
-        var body = JsonSerializer.Serialize(new { username = "test", email = "test@test.com", password = "Password1!" });
-        var content = new StringContent(body, Encoding.UTF8, "application/json");
-        var response = await _client.PostAsync("/api/users", content);
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Unauthorized));
-    }
-
-    [Test]
     public async Task UpdateUser_NoToken_Returns401()
     {
         var body = JsonSerializer.Serialize(new { email = "new@test.com" });
@@ -156,22 +147,6 @@ public class UsersControllerIntegrationTests
         Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Forbidden));
     }
 
-    [Test]
-    public async Task CreateUser_WithToken_Returns201()
-    {
-        var (token, _) = await RegisterAndGetTokenAsync();
-        Authenticate(token);
-
-        var body = JsonSerializer.Serialize(new
-        {
-            username = "mansatester",
-            email = "mansatest@test.com",
-            password = "Password123!"
-        });
-        var response = await _client.PostAsync("/api/users",
-            new StringContent(body, Encoding.UTF8, "application/json"));
-        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-    }
 
     [Test]
     public async Task UpdateUser_WithToken_Returns200_ForOwnProfile()

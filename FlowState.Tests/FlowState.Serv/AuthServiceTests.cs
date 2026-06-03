@@ -63,8 +63,25 @@ public class AuthServiceTests
 
         Assert.That(result, Is.Null);
     }
+    [Test]
+    public void Register_HashesPassword_BeforePersisting()
+    {
+        User? captured = null;
+        _mockRepo.Setup(r => r.GetUserByEmail(It.IsAny<string>())).Returns((User?)null);
+        _mockRepo.Setup(r => r.GetUserByUsername(It.IsAny<string>())).Returns((User?)null);
+        _mockRepo.Setup(r => r.AddUser(It.IsAny<User>()))
+                 .Callback<User>(u => captured = u)
+                 .Returns((User u) => u);
+
+        _authServices.Register("VladmirLenin", "vlad@impaler.com", "Sup3rSecret!");
+
+        Assert.That(captured, Is.Not.Null);
+        Assert.That(captured!.PasswordHash, Is.Not.EqualTo("Sup3rSecret!"));
+        Assert.That(BCrypt.Net.BCrypt.Verify("Sup3rSecret!", captured.PasswordHash), Is.True);
+    }
 
     //Login
+
     [Test]
     public void Login_WithValidCredential_ReturnsUser()
     {

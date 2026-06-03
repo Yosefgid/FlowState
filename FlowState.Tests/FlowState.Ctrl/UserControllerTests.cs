@@ -107,57 +107,6 @@ public class UserControllerTests
         Assert.That(result, Is.InstanceOf<UnauthorizedResult>());
     }
 
-    //Add user (no ownership check — slated for removal next ticket)
-    [Test]
-    public void CreateUser_ReturnsCreated_WhenDtoIsValid()
-    {
-        var dto = new CreateUserDto { Username = "alice", Email = "notbob@Max.com", Password = "Qwerty1" };
-        var created = new User { Id = 3, Username = "alice", Email = "notbob@Max.com" };
-        _mockUserServices.Setup(s => s.AddUser(It.IsAny<User>(), dto.Password)).Returns(created);
-
-        var result = _controller.CreateUser(dto);
-        var createdResult = result as CreatedAtActionResult;
-
-        Assert.That(createdResult, Is.Not.Null);
-        Assert.That(createdResult!.StatusCode, Is.EqualTo(201));
-        Assert.That((createdResult.Value as User)!.Username, Is.EqualTo("alice"));
-    }
-
-    [Test]
-    public void CreateUser_ReturnsBadRequest_WhenUsernameIsEmpty()
-    {
-        var dto = new CreateUserDto { Username = "", Email = "roam@roam.com", Password = "pass" };
-        var result = _controller.CreateUser(dto);
-        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-    }
-
-    [Test]
-    public void CreateUser_ReturnsBadRequest_WhenEmailIsEmpty()
-    {
-        var dto = new CreateUserDto { Username = "Charles", Email = "", Password = "pass" };
-        var result = _controller.CreateUser(dto);
-        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-    }
-
-    [Test]
-    public void CreateUser_ReturnsBadRequest_WhenPaasswordIsEmpty()
-    {
-        var dto = new CreateUserDto { Username = "Charles", Email = "lol@lol.com", Password = "" };
-        var result = _controller.CreateUser(dto);
-        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-    }
-
-    [Test]
-    public void CreateUser_ReturnsBadRequest_WhenServiceReturnsNull()
-    {
-        var dto = new CreateUserDto { Username = "dupliKate", Email = "dup@invincible.com", Password = "qwerty" };
-        _mockUserServices.Setup(s => s.AddUser(It.IsAny<User>(), dto.Password)).Returns((User?)null);
-
-        var result = _controller.CreateUser(dto);
-        Assert.That(result, Is.InstanceOf<BadRequestObjectResult>());
-    }
-
-
 
     //Update
     [Test]

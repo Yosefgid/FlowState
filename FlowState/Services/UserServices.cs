@@ -18,16 +18,6 @@ namespace FlowState.Services
         {
             return _userRepo.GetUserById(id);
         }
-        public User? AddUser(User user, string passwordTxt)
-        {
-            var existing = _userRepo.GetAllUsers();
-            bool usernameIsTaken = existing.Any(u => u.Username.ToLower() == user.Username.ToLower());
-            if (usernameIsTaken) return null;
-
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(passwordTxt);
-            return _userRepo.AddUser(user);
-
-        }
         public bool DeleteUser(int id)
         {
             return _userRepo.DeleteUser(id);
