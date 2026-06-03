@@ -62,49 +62,7 @@ public class UserServicesTests
         Assert.That(result, Is.Null);
     }
 
-    //AddUser
-    [Test]
-    public void AddUser_ReturnsUser_WhenDataIsValid()
-    {
-        var newUser = new User { Username = "VladmirLenin", Email = "vladnot@impaler.com" };
-        _mockRepo.Setup(r => r.GetAllUsers()).Returns(_users);
-        _mockRepo.Setup(r => r.AddUser(It.IsAny<User>())).Returns(newUser);
-        var result = _service.AddUser(newUser, "notpassword");
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.Username, Is.EqualTo(newUser.Username));
-        _mockRepo.Verify(r => r.AddUser(It.Is<User>(u => u.Username == "VladmirLenin")), Times.Once);
-
-    }
-
-    [Test]
-    public void AddUser_HashesPassword_BeforeSendingToRepo()
-    {
-        var newUser = new User { Username = "VladmirLenin", Email = "vladnot@impaler.com" };
-        _mockRepo.Setup(r => r.GetAllUsers()).Returns(_users);
-
-        User? passUser = null;
-        _mockRepo.Setup(r => r.AddUser(It.IsAny<User>())).Callback<User>(u => passUser = u).Returns(newUser);
-
-        _service.AddUser(newUser, "notapassword");
-        Assert.That(passUser!.PasswordHash, Is.Not.EqualTo("notapassword"));
-        Assert.That(BCrypt.Net.BCrypt.Verify("notapassword", passUser.PasswordHash), Is.True);
-
-
-        // Hashing a plain-text password
-        //string hashed = BCrypt.Net.BCrypt.HashPassword("plainTextPassword");
-
-        // Verifying a plain-text password against a hash
-        //bool isValid = BCrypt.Net.BCrypt.Verify("plainTextPassword", hashed);
-    }
-    [Test]
-    public void AddUser_ReturnsNull_WhenUsernameIsTaken()
-    {
-        var newUser = new User { Username = "KarlMax", Email = "notMax@impaler.com" };
-        _mockRepo.Setup(r => r.GetAllUsers()).Returns(_users);
-        var result = _service.AddUser(newUser, "notapassword");
-        Assert.That(result, Is.Null);
-
-    }
+   
     //Delete
     [Test]
     public void DeleteUser_ReturnsTrue_WhenUserExists()

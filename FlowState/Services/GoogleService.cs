@@ -31,15 +31,32 @@ namespace FlowState.Services
         {
             var googleEvents = await _googleCalendarClient.GetCalendarEventsAsync(userId);
 
+            var existingGoogleIds = _taskRepo.GetAllTasks()
+                .Where(t => !string.IsNullOrWhiteSpace(t.GoogleId))
+                .Select(t => t.GoogleId)
+                .ToHashSet();
+
             var importedTasks = new List<ToDoTask>();
 
             foreach (var googleEvent in googleEvents)
             {
+                if (string.IsNullOrWhiteSpace(googleEvent.Id))
+                {
+                    continue;
+                }
+
+                if (existingGoogleIds.Contains(googleEvent.Id))
+                {
+                    continue;
+                }
+
                 var task = MapGoogleEventToTask(googleEvent);
 
                 _taskRepo.AddTask(task);
 
                 importedTasks.Add(task);
+
+                existingGoogleIds.Add(googleEvent.Id);
             }
 
             return importedTasks;

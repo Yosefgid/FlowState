@@ -69,19 +69,30 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-builder.Services.AddDbContext<MyDbContext>(options =>
-   options.UseInMemoryDatabase("TestDb"));
+var useInMemory = builder.Configuration.GetValue<bool>("UseInMemoryDatabase");
+
+if (useInMemory)
+{
+    builder.Services.AddDbContext<MyDbContext>(options =>
+        options.UseInMemoryDatabase("TestDb"));
+}
+else
+{
+    builder.Services.AddDbContext<MyDbContext>(options =>
+        options.UseSqlServer(
+            builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-    if (!app.Environment.IsEnvironment("Testing"))
-    {
-        db.Database.EnsureCreated();
-    }
-}
+//using (var scope = app.Services.CreateScope())
+//{
+//    var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+//    if (!app.Environment.IsEnvironment("Testing"))
+//    {
+//        db.Database.EnsureCreated();
+//    }
+//}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

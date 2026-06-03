@@ -19,5 +19,13 @@ namespace FlowState
         : base(options)
         {
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ToDoTask>()
+                .HasIndex(t => t.GoogleId)
+                .IsUnique()
+                .HasFilter("[GoogleId] IS NOT NULL");
+        }
     }
 }
