@@ -49,6 +49,12 @@
     private async Task HandleLogin()
     {
         _error = null;
+        if (string.IsNullOrWhiteSpace(_request.Email) ||
+           string.IsNullOrWhiteSpace(_request.Password))
+        {
+            _error = "Email and password are required.";
+            return;
+        }
         _loading = true;
         var (success, error) = await AuthService.LoginAsync(_request);
         if (success)
