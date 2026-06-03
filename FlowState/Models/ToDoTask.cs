@@ -24,6 +24,8 @@ namespace FlowState.Models
 
         public EisenCat Category { get; set; }
 
+        public int SessionId { get; set; }
+
         public string? GoogleId { get; set; }
 
 
