@@ -1,18 +1,60 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Nav
+@using FlowState.Blazer.Services
+@inject AuthStateServ AuthState
 
-<Layout Sider>
-    <LayoutSider>
-        <NavMenu />
-    </LayoutSider>
-    <Layout>
+@if (_ready)
+{
+    <Layout Sider>
+        <LayoutSider>
+            <NavMenu />
+        </LayoutSider>
+        <Layout>
 
-        <LayoutHeader>
-            <TopBar />
-        </LayoutHeader>
-        <LayoutContent Class="ps-3">
-            <div class="page-body">
-                @Body
-            </div>
-        </LayoutContent>
+            <LayoutHeader>
+                <TopBar />
+            </LayoutHeader>
+            <LayoutContent Class="ps-3">
+                <div class="page-body">
+                    @Body
+                </div>
+            </LayoutContent>
+        </Layout>
     </Layout>
-</Layout>
+
+}
+else
+{
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <p>Loading...</p>
+    </div>
+}
+
+@code {
+    bool _ready;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        try
+        {
+            await AuthState.InitialiseAsync();
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"[MainLayout] InitialiseAsync threw: {ex.Message}");
+            Nav.NavigateTo("/login", forceLoad: false);
+        }
+        Console.WriteLine($"[MainLayout] IsLoggedIn = {AuthState.IsLoggedIn}");
+        // await AuthState.InitialiseAsync();
+        if (!AuthState.IsLoggedIn)
+        {
+            Nav.NavigateTo("/login", forceLoad: false);
+            return;
+        }
+
+        _ready = true;
+        StateHasChanged();
+    }
+}

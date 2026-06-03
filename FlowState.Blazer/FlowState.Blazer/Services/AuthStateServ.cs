@@ -24,6 +24,13 @@ namespace FlowState.Blazer.Services
                 return;
             }
             var claims = ParseClaimsFromJwt(token);
+            if (claims.TryGetValue("exp", out var expStr) &&
+               long.TryParse(expStr, out var exp) &&
+               DateTimeOffset.FromUnixTimeSeconds(exp) <= DateTimeOffset.UtcNow)
+            {
+                await _tokenService.RemoveTokenAsync();
+                return;
+            }
             Username = claims.GetValueOrDefault("username");
             Email = claims.GetValueOrDefault("email");
         }
