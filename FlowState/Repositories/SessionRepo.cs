@@ -1,4 +1,5 @@
 ﻿using FlowState.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowState.Repositories
 {
@@ -21,7 +22,9 @@ namespace FlowState.Repositories
         public List<SessionUser>? GetSessionUsersBySession(int sessionId);
 
 
-        public bool DeleteSessionUser(int sessionUserId);
+        public bool DeleteSessionUser(int userId , int sessionId);
+
+        public SessionInvite CreateSessionInvite(SessionInvite invite);
 
     }
     public class SessionRepo : ISessionRepo
@@ -108,9 +111,10 @@ namespace FlowState.Repositories
             return su;
         }
 
-        public bool DeleteSessionUser(int sessionUserId )
+        public bool DeleteSessionUser(int userId, int sessionId )
         {
-            var sessionUser = _dbContext.SessionUsers.FirstOrDefault(su => su.Id == sessionUserId);
+            var sessionUser = _dbContext.SessionUsers.FirstOrDefault(su => su.UserId == userId 
+                && su.SessionId == sessionId);
 
             if (sessionUser == null)
                 return false;
@@ -141,6 +145,14 @@ namespace FlowState.Repositories
                 return null;
 
             return _dbContext.SessionUsers.Where(y => y.SessionId == sessionId).ToList();
+        }
+
+        public SessionInvite CreateSessionInvite(SessionInvite invite)
+        {
+            _dbContext.SessionInvites.Add(invite);
+            _dbContext.SaveChanges();
+
+            return invite;                                     
         }
     }
 }

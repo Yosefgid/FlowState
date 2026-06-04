@@ -23,7 +23,9 @@ namespace FlowState.Services
         public List<SessionUser>? GetSessionUsersBySession(int sessionId);
 
 
-        public bool DeleteSessionUser(int sessionUserId);
+        public bool DeleteSessionUser(int userId, int sessionId);
+
+        public SessionInvite CreateSessionInvite(SessionInvite invite);
 
     }
     public class SessionService : ISessionService
@@ -70,9 +72,9 @@ namespace FlowState.Services
             return _sessionRepo.AddSessionUser(sessionId, userId);
         }
 
-        public bool DeleteSessionUser(int sessionUserId)
+        public bool DeleteSessionUser(int userId, int sessionId)
         {
-            return _sessionRepo.DeleteSessionUser(sessionUserId);  
+            return _sessionRepo.DeleteSessionUser(userId,sessionId);  
         }
 
         public SessionUser? GetSessionUser(int sessionUserId)
@@ -86,6 +88,11 @@ namespace FlowState.Services
             return _sessionRepo.GetSessionUsersBySession(sessionId);    
         }
 
-        
+        public SessionInvite CreateSessionInvite(SessionInvite invite)
+        {
+            return _sessionRepo.CreateSessionInvite(invite);    
+        }
+
+
     }
 }
