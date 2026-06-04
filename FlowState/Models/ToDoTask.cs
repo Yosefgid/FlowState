@@ -53,5 +53,6 @@ namespace FlowState.Models
             EndDate = date;
             return this;
         }
+
     }
 }

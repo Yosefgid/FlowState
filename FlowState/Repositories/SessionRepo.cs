@@ -55,6 +55,7 @@ namespace FlowState.Repositories
         public Session AddSession(int userId,Session session)
         {
             _dbContext.Sessions.Add(session);
+            session.AdminId = userId;
             _dbContext.SaveChanges();
 
             _dbContext.SessionUsers.Add(new SessionUser(session.Id, userId));
