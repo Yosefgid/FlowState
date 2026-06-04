@@ -1,4 +1,5 @@
 ﻿using FlowState.Blazer.Models.Auth;
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace FlowState.Blazer.Services
@@ -28,6 +29,7 @@ namespace FlowState.Blazer.Services
 
             var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
             await _tokenService.SetTokenAsync(result!.Token);
+            SetAuthHeader(result.Token);
             _authStateService.SetUser(result.Username, result.Email);
             return (true, null);
         }
@@ -43,6 +45,7 @@ namespace FlowState.Blazer.Services
 
             var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
             await _tokenService.SetTokenAsync(result!.Token);
+            SetAuthHeader(result.Token);
             _authStateService.SetUser(result.Username, result.Email);
             return (true, null);
         }
@@ -50,6 +53,14 @@ namespace FlowState.Blazer.Services
         public async Task LogoutAsync()
         {
             await _authStateService.LogoutAsync();
+            SetAuthHeader(null);
+        }
+        private void SetAuthHeader(string? token)
+        {
+            _http.DefaultRequestHeaders.Authorization =
+                string.IsNullOrWhiteSpace(token)
+                    ? null
+                    : new AuthenticationHeaderValue("Bearer", token);
         }
 
         private async Task<string> ReadErrorAsync(HttpResponseMessage response)

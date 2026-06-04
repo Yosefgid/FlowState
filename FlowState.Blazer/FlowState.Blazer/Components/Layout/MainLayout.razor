@@ -2,6 +2,9 @@
 @inject NavigationManager Nav
 @using FlowState.Blazer.Services
 @inject AuthStateServ AuthState
+@using System.Net.Http.Headers
+@inject TokenService TokenService
+@inject HttpClient Http
 
 @if (_ready)
 {
@@ -52,6 +55,11 @@ else
         {
             Nav.NavigateTo("/login", forceLoad: false);
             return;
+        }
+        var token = await TokenService.GetTokenAsync();
+        if (!string.IsNullOrEmpty(token))
+        {
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
         _ready = true;

@@ -6,6 +6,8 @@ namespace FlowState.Repositories
     {
         public List<ToDoTask> GetAllTasks();
 
+        public List<ToDoTask> GetAllTasksByUser(int userId);
+
         public ToDoTask? GetTask(int id);
 
         public ToDoTask AddTask(ToDoTask task);
@@ -39,6 +41,11 @@ namespace FlowState.Repositories
         {
             return _dbContext.Tasks.ToList();
         }
+        
+        public List<ToDoTask> GetAllTasksByUser(int userId)
+        {
+            return _dbContext.Tasks.Where(t => t.UserId == userId).ToList();
+        }
 
         public ToDoTask? GetTask(int id)
         {
@@ -67,6 +74,10 @@ namespace FlowState.Repositories
             if (existingTask == null)
                 return null;
 
+            //this I am a bit confused, is it not overwriting? it is copying everything
+            //for example in the Post you would get updateTask.UserId = 0 , but the client would not send it 
+            //set value will copy everything from the post and EF save it overwritng the actual Id?
+            
             _dbContext.Entry(existingTask).CurrentValues.SetValues(updatedTask);
 
             _dbContext.SaveChanges();
