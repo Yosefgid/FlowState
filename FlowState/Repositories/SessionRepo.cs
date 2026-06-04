@@ -1,5 +1,6 @@
 ﻿using FlowState.Models;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 
 namespace FlowState.Repositories
 {
@@ -25,6 +26,8 @@ namespace FlowState.Repositories
         public bool DeleteSessionUser(int userId , int sessionId);
 
         public SessionInvite CreateSessionInvite(SessionInvite invite);
+
+        public SessionInvite? GetInvite(string token);
 
     }
     public class SessionRepo : ISessionRepo
@@ -153,6 +156,16 @@ namespace FlowState.Repositories
             _dbContext.SaveChanges();
 
             return invite;                                     
+        }
+
+        public SessionInvite? GetInvite(string token)
+        {
+            var invite = _dbContext.SessionInvites
+                .FirstOrDefault(i =>
+                    i.Token == token &&
+                    i.ExpiresAt > DateTime.UtcNow);
+
+            return invite;
         }
     }
 }

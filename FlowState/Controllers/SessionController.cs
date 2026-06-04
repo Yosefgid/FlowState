@@ -82,6 +82,21 @@ namespace FlowState.Controllers
             return Ok($"https://yourapp.com/invite/{invite.Token}");
         }
 
+        [HttpPost("invite/{token}/accept")]
+        public ActionResult AcceptInvite(string token)
+        {
+            var invite = _sessionService.GetInvite(token);
+
+            if (invite == null)
+                return BadRequest();
+
+            var userId = 0 ;// change
+
+            _sessionService.AddSessionUser(invite.SessionId, userId);
+
+            return Ok();
+        }
+
         //// POST session/5/user/10
         //[HttpPost("{sessionId}/user/{userId}")]
         //public ActionResult<SessionUser> AddSessionUser(int sessionId, int userId)

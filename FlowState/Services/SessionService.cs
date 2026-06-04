@@ -27,6 +27,8 @@ namespace FlowState.Services
 
         public SessionInvite CreateSessionInvite(SessionInvite invite);
 
+        public SessionInvite? GetInvite(string token);
+
     }
     public class SessionService : ISessionService
     {
@@ -93,6 +95,10 @@ namespace FlowState.Services
             return _sessionRepo.CreateSessionInvite(invite);    
         }
 
+        public SessionInvite? GetInvite(string token)
+        {
+            return _sessionRepo.GetInvite(token);
+        }
 
     }
 }
