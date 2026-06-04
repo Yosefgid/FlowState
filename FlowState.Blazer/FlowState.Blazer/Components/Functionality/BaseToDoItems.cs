@@ -3,6 +3,8 @@ using FlowState.Models;
 using Microsoft.AspNetCore.Components;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Net.Http.Headers;
+using FlowState.Blazer.Services;
 
 namespace FlowState.Blazer.Components.Functionality
 {
@@ -12,6 +14,8 @@ namespace FlowState.Blazer.Components.Functionality
 
         [Inject]
         protected HttpClient Http { get; set; } = default!;
+        [Inject]
+        protected TokenService TokenService { get; set; } = default!;
 
         [Inject]
         protected TaskStateService TaskState { get; set; } = default!;
@@ -76,9 +80,26 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected int CompletionPercentage => TotalCount == 0 ? 0 : CompletedCount * 100 / TotalCount;
 
-
+        private async Task SetAuthHeaderAsync()
+        {
+            var token = await TokenService.GetTokenAsync();
+            Console.WriteLine($"[BaseTodoItems] token = {(string.IsNullOrEmpty(token) ? "NULL" : "present")}");
+            Http.DefaultRequestHeaders.Authorization =
+                string.IsNullOrWhiteSpace(token)
+                    ? null
+                    : new AuthenticationHeaderValue("Bearer", token);
+        }
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (!firstRender) return;
+            await SetAuthHeaderAsync();
+            await TaskState.RefreshTasks();
+            todos = TaskState.Tasks;
+            StateHasChanged();
+        }
         protected override async Task OnInitializedAsync()
         {
+
             await TaskState.RefreshTasks();
             todos = TaskState.Tasks;
             foreach (var task in TaskState.Tasks)
@@ -136,24 +157,37 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected async Task OnAddTodo()
         {
-      
+            await SetAuthHeaderAsync();
+            Console.WriteLine($"[OnAddTodo] Auth header = {Http.DefaultRequestHeaders.Authorization}");
+
             if (await nameValidations.ValidateAll() && await descValidations.ValidateAll())
             {
                 Console.WriteLine("Pressed");
                 ToDoTask task = new(name?.Trim(), description?.Trim(), "N/A");
-                todos.Add(task);
-                OrderTodos();
-                description = null;
-                name = null;
                 try
                 {
-                    await Http.PostAsJsonAsync("/api/tasks", task);
-                    
+                    var response = await Http.PostAsJsonAsync("/api/tasks", task);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var createdTask = await response.Content.ReadFromJsonAsync<ToDoTask>();
+                        if (createdTask != null)
+                        {
+                            todos.Add(createdTask);
+                            OrderTodos();
+                        }
+                    } else
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"[OnAddTodo] error body = {body}");
+                    }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
+
+                name = null;
+                description = null;
                 await nameValidations.ClearAll();
                 await descValidations.ClearAll();
 

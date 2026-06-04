@@ -8,6 +8,8 @@ namespace FlowState.Services
     {
         public List<ToDoTask> GetAllTasks();
 
+
+        public List<ToDoTask> GetAllTasksByUser(int userId);
         public ToDoTask? GetTask(int id);
 
         public ToDoTask AddTask(ToDoTask task);
@@ -42,6 +44,10 @@ namespace FlowState.Services
             return _taskRepo.GetAllTasks();
         }
 
+        public List<ToDoTask> GetAllTasksByUser(int userId)        
+        {
+            return _taskRepo.GetAllTasksByUser(userId);
+        }
         public ToDoTask? GetTask(int id)
         {
 

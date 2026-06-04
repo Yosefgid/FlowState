@@ -36,7 +36,7 @@ public class ToDoTaskControllerTests
     [TearDown]
     public void TearDown()
     {
-        taskController.Dispose();
+        //taskController.Dispose();
     }
 
     [Test]
@@ -47,7 +47,7 @@ public class ToDoTaskControllerTests
                    .Returns(exampleTasks);
 
         // Act
-        var result = taskController.GetTasks();
+        var result = taskController.GetAllTasks();
 
         // Assert
         Assert.That(result, Is.InstanceOf<OkObjectResult>());

@@ -26,6 +26,8 @@ namespace FlowState.Models
 
         public int? SessionId { get; set; }
 
+        public int UserId { get; set; }
+
         public string? GoogleId { get; set; }
 
         public ToDoTask(string name, string description, string googleId)
