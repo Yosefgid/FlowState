@@ -32,12 +32,18 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected Filter filter = Filter.All;
 
+        protected int selectedSession = -1;
+
+        public bool loaded = false;
+
+        protected Dictionary<int, string> sessions { get; set; } = new();
+
         protected List<ToDoTask> todos = new() { 
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+            new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
+            new ToDoTask(0,"Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
+            new ToDoTask(0,"Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
+            new ToDoTask(0,"Frontend UI", "Build Blazor or React task UI", "google-4"),
+            new ToDoTask(0,"Write Tests", "Add unit tests for service layer", "google-5")
 
         };
 
@@ -59,8 +65,6 @@ namespace FlowState.Blazer.Components.Functionality
          
                 return query;
             }
-
-            
 
         }
 
@@ -101,12 +105,32 @@ namespace FlowState.Blazer.Components.Functionality
         {
 
             await TaskState.RefreshTasks();
+            await TaskState.RefreshSessions(false);
+
+            TaskState.Sessions.ForEach(x => sessions.Add(x.Id, x.Name));
             todos = TaskState.Tasks;
+            loaded = true;
             foreach (var task in TaskState.Tasks)
             {
                 Console.WriteLine(task.Description);
             }
             Console.WriteLine("Tasks");
+
+        }
+
+        public async Task SessionFilter(int sessionId)
+        {
+            selectedSession = sessionId;
+            if (sessionId == -1)
+            {
+                await TaskState.RefreshTasks();
+            }
+            else
+            {
+                await TaskState.RefreshTasks(sessionId);
+            }
+
+            todos = TaskState.Tasks;
 
         }
 
@@ -163,7 +187,12 @@ namespace FlowState.Blazer.Components.Functionality
             if (await nameValidations.ValidateAll() && await descValidations.ValidateAll())
             {
                 Console.WriteLine("Pressed");
-                ToDoTask task = new(name?.Trim(), description?.Trim(), "N/A");
+                ToDoTask task = new(TaskState.UserId,name?.Trim(), description?.Trim(), null);
+                task.SessionId = selectedSession == -1 ? 0 : selectedSession; 
+                todos.Add(task);
+                OrderTodos();
+                description = null;
+                name = null;
                 try
                 {
                     var response = await Http.PostAsJsonAsync("/api/tasks", task);

@@ -18,11 +18,11 @@ public class ToDoTaskServiceTests
 
         exampleTasks = new List<ToDoTask>
         {
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+            new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
+            new ToDoTask(0,"Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
+            new ToDoTask(0,"Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
+            new ToDoTask(0,"Frontend UI", "Build Blazor or React task UI", "google-4"),
+            new ToDoTask(0,"Write Tests", "Add unit tests for service layer", "google-5")
         };
 
         for(int i = 0; i < exampleTasks.Count; i++)
@@ -69,7 +69,7 @@ public class ToDoTaskServiceTests
     public void AddTask_ReturnsCreatedTask()
     {
         // Arrange
-        var newTask = new ToDoTask("New Task", "Testing add method", "google-6");
+        var newTask = new ToDoTask(0,"New Task", "Testing add method", "google-6");
 
         _moqRepo.Setup(repo => repo.AddTask(newTask))
                 .Returns(newTask);
