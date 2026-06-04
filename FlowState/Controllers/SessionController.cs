@@ -77,7 +77,7 @@ namespace FlowState.Controllers
             var invite = new SessionInvite(sessionId);
            
 
-            
+            _sessionService.CreateSessionInvite(invite);
 
             return Ok($"https://yourapp.com/invite/{invite.Token}");
         }
