@@ -1,5 +1,6 @@
 ﻿@inject NavigationManager Navigation
 @inject TaskStateService TaskState
+@page "/"
 
 @rendermode InteractiveServer
 <div class="dashboard">
@@ -10,16 +11,32 @@
         <Dropdown>
             <DropdownToggle Color="Color.Secondary" Outline>
                 <Icon Name="IconName.Clock" Class="me-2" />
-                @selectedRange
+                @if (!loaded)
+                {
+                    <Text>Loading...</Text>
+                }
+                else
+                {
+                    <Text>@sessions[selectedSession]</Text>
+                }
             </DropdownToggle>
             <DropdownMenu>
-                @foreach (var r in ranges)
+
+                @if (sessions == null)
                 {
-                    <DropdownItem Active="r == selectedRange"
-                                  Clicked="() => SelectRange(r)">
-                        @r
-                    </DropdownItem>
+                    <Div>Loading...</Div>
                 }
+                else
+                {
+                    @foreach (var r in sessions)
+                    {
+                        <DropdownItem Active="r.Value == sessions[selectedSession]"
+                                      Clicked="() => RefreshDashboard(r.Key)">
+                            @r.Value
+                        </DropdownItem>
+                    }
+                }
+                
             </DropdownMenu>
         </Dropdown>
 
@@ -172,14 +189,14 @@
                 <CardHeader>
                     <Div Flex="Flex.JustifyContent.Between.AlignItems.Center">
                         <CardTitle>Session Tasks Complete Rate</CardTitle>
-                        <Anchor To="/goals" Class="card-link">View all →</Anchor>
+                        @* <Anchor To="/goals" Class="card-link">View all →</Anchor> *@
                     </Div>
                 </CardHeader>
                 <CardBody>
-                    <Div Flex="Flex.Column" Gap="Gap.Is4">
+                    <Div Flex="Flex.Column" Gap="Gap.Is4" Class="scroll-column">
                         @foreach (var g in Goals)
                         {
-                            var pct = (int)Math.Min((g.Current / g.Target) * 100, 100);
+                            var pct = g.Target == 0 ? 0 : (int)Math.Min((g.Current * 100.0 / g.Target), 100);
                             <div class="goal-item">
                                 <Div Flex="Flex.JustifyContent.Between" Class="mb-1">
                                     <Text Class="goal-name">@g.Name</Text>
@@ -204,19 +221,51 @@
 
     private List<ToDoTask> Tasks ;
 
+    public bool loaded = false;
+
     protected override async Task OnInitializedAsync()
-    {
-        await TaskState.RefreshTasks();
+    {    
+        await TaskState.RefreshTasks(selectedSession);
+        await TaskState.RefreshSessions();
+
         Tasks = TaskState.Tasks;
 
+        TaskState.Sessions.ForEach(x => sessions.Add(x.Id, x.Name)); 
+        TaskState.Sessions.ForEach(x => Goals.Add(new(x.Name, TaskState.CompletedCount[x.Id][0],
+             TaskState.CompletedCount[x.Id][1], "green")));
+
+        loaded = true;
+
+
         DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
+
+        
     }   
 
     // ── Session edit ──────────────────────────────────────────────────────────
-    private string selectedRange = "Session0";
-    private readonly string[] ranges = { "Session0", "Session1", "Session2", "Session3", "Session4" };
+    private int selectedSession = 0;
+    private Dictionary<int, string> sessions { get; set; } = new();
+    private List<GoalItem> Goals { get; set; } = new();
 
-    private void SelectRange(string range) => selectedRange = range;
+    private async Task RefreshDashboard(int range) 
+    {
+
+        selectedSession = range;
+        await TaskState.RefreshTasks(range);
+        Tasks = TaskState.Tasks;
+        DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
+        sessions = TaskState.Sessions.ToDictionary(x => x.Id, x => x.Name);
+        Goals = TaskState.Sessions
+        .Select(x => new GoalItem(
+            x.Name,
+            TaskState.CompletedCount[x.Id][0],   
+            TaskState.CompletedCount[x.Id][1],
+            "green"
+        ))
+        .ToList();
+        await InvokeAsync(StateHasChanged);
+    }
+
     // ── Stat cards ──────────────────────────────────────────────────────────
     private List<(string Title, string Value, string Change, bool Positive, IconName Icon, string Accent)> Stats => new()
     {
@@ -226,42 +275,8 @@
         ("Today's Tasks", GetTasksDone(DailyTasks), "-0.3", false, IconName.Star, "purple"),
     };
 
-    // ── Bar chart data ───────────────────────────────────────────────────────
-    private readonly int[] FocusData = { 4, 6, 5, 8, 7, 9, 6 };
-    private readonly int[] TaskData = { 5, 7, 6, 9, 8, 10, 7 };
-    private readonly string[] DayLabels = { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
-    private int MaxVal => Math.Max(FocusData.Max(), TaskData.Max()) + 1;
-    private double BarHeight(int val) => (val / (double)MaxVal) * 100;
-
-    // ── Tasks ────────────────────────────────────────────────────────────────
     private List<ToDoTask> DailyTasks { get; set; } = new(){
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5"),
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
-        };
 
-    // ── Sessions ─────────────────────────────────────────────────────────────
-    private readonly List<SessionItem> Sessions = new()
-    {
-        new("Deep Work — Code",   "09:00", "11:30", 9.2, "#22d3ee"),
-        new("Email & Planning",   "12:00", "12:45", 6.1, "#a78bfa"),
-        new("Design Review",      "14:00", "15:30", 8.4, "#34d399"),
-        new("Learning — Reading", "17:00", "18:00", 7.8, "#fb923c"),
-    };
-
-    // ── Goals ────────────────────────────────────────────────────────────────
-    private readonly List<GoalItem> Goals = new()
-    {
-        new("Session0", 32.5, 40,  "cyan"),
-        new("Session1",    47,   60,  "green"),
-        new("Session2",      95,   120, "purple"),
     };
 
     private async Task ToggleTask(ToDoTask task, bool isChecked)
@@ -277,13 +292,13 @@
 
     private void ToEisen()
     {
-        Navigation.NavigateTo($"/eisen");
+        Navigation.NavigateTo($"/eisen/{selectedSession}");
     }
 
     private string PriorityColor(EisenCat cat) => cat switch
     {
         EisenCat.Do => "background-color: red",
-        EisenCat.Schedule => "background-color: blue",
+        EisenCat.Schedule => "background-color: purple",
         EisenCat.Eliminate => "background-color: gray",
         _ => "background-color: darkorange"
     };
@@ -297,5 +312,5 @@
     }
 
     record SessionItem(string Name, string Start, string End, double Score, string Color);
-    record GoalItem(string Name, double Current, double Target, string Accent);
+    record GoalItem(string Name, int Current, int Target, string Accent);
 }

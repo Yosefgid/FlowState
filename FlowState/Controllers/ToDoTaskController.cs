@@ -1,7 +1,9 @@
-﻿using FlowState.Models;
+﻿using FlowState.Controllers;
+using FlowState.Models;
 using FlowState.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace FlowState.Controllers
@@ -11,15 +13,25 @@ namespace FlowState.Controllers
     public class ToDoTaskController : Controller
     {
         private readonly IToDoTaskService _taskService;
+
+
         public ToDoTaskController(IToDoTaskService TaskService) 
         { 
             _taskService = TaskService;
+                
         }
 
         [HttpGet]
         public IActionResult GetAllTasks()
         {
             return Ok(_taskService.GetAllTasks());
+        }
+
+        [HttpGet("user/{id}")]
+        public IActionResult GetAllUserTasks(int id)
+        {
+            return Ok(_taskService.GetAllRelevantTasks(id));
+           
         }
 
         [HttpGet("session/{sessionId}")]
@@ -119,8 +131,8 @@ namespace FlowState.Controllers
         }
 
 
-        
 
+        
 
 
 

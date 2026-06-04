@@ -9,6 +9,9 @@ namespace FlowState.Models
         [Required]
         public string Name { get; set; }
 
+        [Required]
+        public int UserId { get; set; }
+
         public string? Description { get; set; }
 
         public bool IsCompleted { get; set; }
@@ -28,8 +31,9 @@ namespace FlowState.Models
 
         public string? GoogleId { get; set; }
 
-        public ToDoTask(string name, string description, string googleId)
+        public ToDoTask(int userId,string name, string description, string googleId)
         {
+            UserId = userId;
             Name = name;
             Description = description;
             IsCompleted = false;

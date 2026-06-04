@@ -1,15 +1,20 @@
 ﻿using FlowState.Models;
 using FlowState.Repositories;
+using System.Security.Claims;
+
 
 namespace FlowState.Services
 {
     public class UserServices : IUserServices
     {
         private readonly IUserRepo _userRepo;
+
+        public int UserId { get; set; }
         public UserServices(IUserRepo userRepo)
         {
             _userRepo = userRepo;
         }
+
         public List<User> GetAllUser()
         {
             return _userRepo.GetAllUsers();
@@ -34,6 +39,8 @@ namespace FlowState.Services
             if (usernameIsTaken) return null;
             return _userRepo.ChangeUsername(id, newUsername);
         }
+
+        
 
     }
 }

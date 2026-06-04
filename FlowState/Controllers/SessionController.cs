@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FlowState.Controllers
 {
-    [Route("session")]
+    [Route("api/sessions")]
     [ApiController]
     public class SessionController : Controller
     {

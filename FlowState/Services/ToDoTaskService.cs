@@ -26,15 +26,21 @@ namespace FlowState.Services
 
         public List<ToDoTask> GetTasksBySession(int sessionId);
 
+        public List<ToDoTask> GetAllTasksByUser(int? userId);
+
+        public List<ToDoTask> GetAllRelevantTasks(int userId);
+
     }
     public class ToDoTaskService : IToDoTaskService
     {
 
         private readonly IToDoTaskRepo _taskRepo;
+        private readonly ISessionService _sessionService;
 
-        public ToDoTaskService(IToDoTaskRepo repo)
+        public ToDoTaskService(IToDoTaskRepo repo, ISessionService sessionService)
         {
             _taskRepo = repo;
+            _sessionService = sessionService;
         }
 
         public List<ToDoTask> GetAllTasks()
@@ -42,6 +48,10 @@ namespace FlowState.Services
             return _taskRepo.GetAllTasks();
         }
 
+        public List<ToDoTask> GetAllTasksByUser(int? userId)
+        {
+            return _taskRepo.GetAllTasksByUser(userId);
+        }
         public ToDoTask? GetTask(int id)
         {
 
@@ -88,6 +98,21 @@ namespace FlowState.Services
         public List<ToDoTask> GetTasksBySession(int sessionId)
         {
             return _taskRepo.GetTasksBySession(sessionId);
+        }
+
+
+        public List<ToDoTask> GetAllRelevantTasks(int userId)
+        {
+            List<Session> sessions = _sessionService.GetSessionsByUser(userId);
+            List<ToDoTask> AllTasks = GetAllTasksByUser(userId).Where(x => x.SessionId == 0).ToList();
+            List<ToDoTask> sessionTasks = new();
+
+            sessions.ForEach(x => GetTasksBySession(x.Id).ForEach(y => sessionTasks.Add(y)));
+            AllTasks.AddRange(sessionTasks);
+
+
+            return AllTasks;
+
         }
 
 

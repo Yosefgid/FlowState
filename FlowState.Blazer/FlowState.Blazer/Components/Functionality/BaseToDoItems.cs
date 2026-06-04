@@ -29,11 +29,11 @@ namespace FlowState.Blazer.Components.Functionality
         protected Filter filter = Filter.All;
 
         protected List<ToDoTask> todos = new() { 
-            new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
+            new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
+            new ToDoTask(0,"Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
+            new ToDoTask(0,"Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
+            new ToDoTask(0,"Frontend UI", "Build Blazor or React task UI", "google-4"),
+            new ToDoTask(0,"Write Tests", "Add unit tests for service layer", "google-5")
 
         };
 
@@ -140,7 +140,7 @@ namespace FlowState.Blazer.Components.Functionality
             if (await nameValidations.ValidateAll() && await descValidations.ValidateAll())
             {
                 Console.WriteLine("Pressed");
-                ToDoTask task = new(name?.Trim(), description?.Trim(), "N/A");
+                ToDoTask task = new(0,name?.Trim(), description?.Trim(), "1122");
                 todos.Add(task);
                 OrderTodos();
                 description = null;

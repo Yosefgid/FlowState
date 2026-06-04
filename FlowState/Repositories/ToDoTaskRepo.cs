@@ -22,6 +22,8 @@ namespace FlowState.Repositories
 
         public ToDoTask AssignEisen(int id, EisenCat cat);
 
+        public List<ToDoTask> GetAllTasksByUser(int? userId);
+
         public List<ToDoTask> GetTasksBySession(int sessionId);
     }
     public class ToDoTaskRepo : IToDoTaskRepo
@@ -38,6 +40,11 @@ namespace FlowState.Repositories
         public List<ToDoTask> GetAllTasks()
         {
             return _dbContext.Tasks.ToList();
+        }
+
+        public List<ToDoTask> GetAllTasksByUser(int? userId)
+        {
+            return _dbContext.Tasks.Where(x => x.UserId == userId).ToList();
         }
 
         public ToDoTask? GetTask(int id)

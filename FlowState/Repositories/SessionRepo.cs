@@ -54,9 +54,13 @@ namespace FlowState.Repositories
 
         public Session AddSession(int userId,Session session)
         {
-            _dbContext.SessionUsers.Add(new SessionUser(session.Id,userId));
             _dbContext.Sessions.Add(session);
             _dbContext.SaveChanges();
+
+            _dbContext.SessionUsers.Add(new SessionUser(session.Id, userId));
+            _dbContext.SaveChanges();
+
+
             return session;
         }
 
