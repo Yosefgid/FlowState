@@ -32,6 +32,7 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected Filter filter = Filter.All;
 
+        /*
         protected List<ToDoTask> todos = new() { 
             new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
             new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
@@ -39,7 +40,9 @@ namespace FlowState.Blazer.Components.Functionality
             new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4"),
             new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5")
 
-        };
+        };*/
+
+        protected List<ToDoTask> todos = new();
 
         protected IEnumerable<ToDoTask> Todos
         {

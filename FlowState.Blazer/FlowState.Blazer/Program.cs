@@ -12,6 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<AuthStateServ>();
+builder.Services.AddScoped<AuthStateServ>();
+builder.Services.AddScoped<UserService>();
 
 
 builder.Services
