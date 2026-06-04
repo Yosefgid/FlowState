@@ -1,6 +1,7 @@
 ﻿using FlowState.Models;
 using Microsoft.AspNetCore.Components;
 using FlowState.Blazer.Services;
+using System.Text.Json;
 
 namespace FlowState.Blazer.Components.Functionality
 {
@@ -89,7 +90,10 @@ namespace FlowState.Blazer.Components.Functionality
                 {
                     Sessions.Clear();
                     Sessions.AddRange(response);
-                    Sessions.Add(new Session(0, "Personal"));
+                    Sessions.Add(new Session(-1, UserId, "All Tasks"));
+                    Sessions.Add(new Session(0, UserId, "Personal"));
+                    
+
                 }
                 //foreach (var task in Tasks)
                 //{
@@ -99,6 +103,28 @@ namespace FlowState.Blazer.Components.Functionality
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+            }
+        }
+
+        public async Task<Session?> CreateSession(Session newSession)
+        {
+            try
+            {
+                var response = await Http.PostAsJsonAsync(
+                    $"/api/sessions/user/{UserId}",
+                    newSession);
+
+                response.EnsureSuccessStatusCode();
+
+                Session? session = await response.Content.ReadFromJsonAsync<Session>();
+                Sessions.Add(session);
+
+                return session ;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
             }
         }
 
@@ -172,6 +198,8 @@ namespace FlowState.Blazer.Components.Functionality
         public void GetCompletedCount()
         {
             Dictionary<int, int[]> result = new();
+            int total = 0;
+            int totalCompleted = 0;
 
             foreach (var x in Tasks)
             {
@@ -185,10 +213,24 @@ namespace FlowState.Blazer.Components.Functionality
                 if (x.IsCompleted)
                 {
                     result[id][0]++;
+                    totalCompleted++;
                 }
 
                 result[id][1]++;
+                total++;
             }
+
+            result[-1] = [totalCompleted,total];
+
+            foreach(var y in Sessions)
+            {
+                if (!result.ContainsKey(y.Id))
+                {
+                    result[y.Id] = new int[2];
+                }
+            }
+
+            
 
             CompletedCount = result;
         }

@@ -28,6 +28,12 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected Filter filter = Filter.All;
 
+        protected int selectedSession = -1;
+
+        public bool loaded = false;
+
+        protected Dictionary<int, string> sessions { get; set; } = new();
+
         protected List<ToDoTask> todos = new() { 
             new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
             new ToDoTask(0,"Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
@@ -56,8 +62,6 @@ namespace FlowState.Blazer.Components.Functionality
                 return query;
             }
 
-            
-
         }
 
         protected int TotalCount => todos.Count;
@@ -80,12 +84,32 @@ namespace FlowState.Blazer.Components.Functionality
         protected override async Task OnInitializedAsync()
         {
             await TaskState.RefreshTasks();
+            await TaskState.RefreshSessions();
+
+            TaskState.Sessions.ForEach(x => sessions.Add(x.Id, x.Name));
             todos = TaskState.Tasks;
+            loaded = true;
             foreach (var task in TaskState.Tasks)
             {
                 Console.WriteLine(task.Description);
             }
             Console.WriteLine("Tasks");
+
+        }
+
+        public async Task SessionFilter(int sessionId)
+        {
+            selectedSession = sessionId;
+            if (sessionId == -1)
+            {
+                await TaskState.RefreshTasks();
+            }
+            else
+            {
+                await TaskState.RefreshTasks(sessionId);
+            }
+
+            todos = TaskState.Tasks;
 
         }
 
@@ -140,7 +164,8 @@ namespace FlowState.Blazer.Components.Functionality
             if (await nameValidations.ValidateAll() && await descValidations.ValidateAll())
             {
                 Console.WriteLine("Pressed");
-                ToDoTask task = new(0,name?.Trim(), description?.Trim(), "1122");
+                ToDoTask task = new(TaskState.UserId,name?.Trim(), description?.Trim(), "11dsfsdf2");
+                task.SessionId = selectedSession == -1 ? 0 : selectedSession; 
                 todos.Add(task);
                 OrderTodos();
                 description = null;

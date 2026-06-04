@@ -10,7 +10,7 @@
 
         <Dropdown>
             <DropdownToggle Color="Color.Secondary" Outline>
-                <Icon Name="IconName.Clock" Class="me-2" />
+                <Icon Name="IconName.Folder" Class="me-2" />
                 @if (!loaded)
                 {
                     <Text>Loading...</Text>
@@ -40,12 +40,39 @@
             </DropdownMenu>
         </Dropdown>
 
-        <Button Color="Color.Primary">
+        <Button Color="Color.Primary" Clicked="OpenSessionModal">
             <Icon Name="IconName.Add" Class="me-1" />
             New Session
         </Button>
 
     </div>
+
+    <Modal @ref="sessionModal">
+        <ModalContent>
+            <ModalHeader>
+                <ModalTitle>Create Session</ModalTitle>
+            </ModalHeader>
+
+            <ModalBody>
+                <Field>
+                    <Label>Session Name</Label>
+                    <TextInput @bind-Value="newSessionName" />
+                </Field>
+            </ModalBody>
+
+            <ModalFooter>
+                <Button Color="Color.Secondary"
+                        Clicked="CloseSessionModal">
+                    Cancel
+                </Button>
+
+                <Button Color="Color.Primary"
+                        Clicked="CreateSession">
+                    Confirm
+                </Button>
+            </ModalFooter>
+        </ModalContent>
+    </Modal>
 
     <!-- ── STAT CARDS ──────────────────────────────────────────────────────── -->
     <Row Gutter="Gutter.Is4" Class="mb-4">
@@ -223,48 +250,10 @@
 
     public bool loaded = false;
 
-    protected override async Task OnInitializedAsync()
-    {    
-        await TaskState.RefreshTasks(selectedSession);
-        await TaskState.RefreshSessions();
-
-        Tasks = TaskState.Tasks;
-
-        TaskState.Sessions.ForEach(x => sessions.Add(x.Id, x.Name)); 
-        TaskState.Sessions.ForEach(x => Goals.Add(new(x.Name, TaskState.CompletedCount[x.Id][0],
-             TaskState.CompletedCount[x.Id][1], "green")));
-
-        loaded = true;
-
-
-        DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
-
-        
-    }   
-
     // ── Session edit ──────────────────────────────────────────────────────────
     private int selectedSession = 0;
     private Dictionary<int, string> sessions { get; set; } = new();
     private List<GoalItem> Goals { get; set; } = new();
-
-    private async Task RefreshDashboard(int range) 
-    {
-
-        selectedSession = range;
-        await TaskState.RefreshTasks(range);
-        Tasks = TaskState.Tasks;
-        DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
-        sessions = TaskState.Sessions.ToDictionary(x => x.Id, x => x.Name);
-        Goals = TaskState.Sessions
-        .Select(x => new GoalItem(
-            x.Name,
-            TaskState.CompletedCount[x.Id][0],   
-            TaskState.CompletedCount[x.Id][1],
-            "green"
-        ))
-        .ToList();
-        await InvokeAsync(StateHasChanged);
-    }
 
     // ── Stat cards ──────────────────────────────────────────────────────────
     private List<(string Title, string Value, string Change, bool Positive, IconName Icon, string Accent)> Stats => new()
@@ -275,9 +264,71 @@
         ("Today's Tasks", GetTasksDone(DailyTasks), "-0.3", false, IconName.Star, "purple"),
     };
 
-    private List<ToDoTask> DailyTasks { get; set; } = new(){
+    private List<ToDoTask> DailyTasks { get; set; } = new()
+    {
 
     };
+
+    record SessionItem(string Name, string Start, string End, double Score, string Color);
+    record GoalItem(string Name, int Current, int Target, string Accent);
+
+    private Modal sessionModal;
+
+    private string newSessionName = "";
+
+    private int nextId = 1;
+
+
+
+    protected override async Task OnInitializedAsync()
+    {    
+        await TaskState.RefreshSessions();
+
+        await TaskState.RefreshTasks(selectedSession);
+
+        Tasks = TaskState.Tasks;
+
+        TaskState.Sessions.ForEach(x => sessions.Add(x.Id, x.Name));
+
+
+
+        TaskState.Sessions.ForEach(x => Goals.Add(new(x.Name, TaskState.CompletedCount[x.Id][0],
+            TaskState.CompletedCount[x.Id][1], "green")));
+
+        loaded = true;
+
+
+        DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
+
+
+    }   
+
+    private async Task RefreshDashboard(int range)
+    {
+        selectedSession = range;
+        if (range == -1)
+        {
+            await TaskState.RefreshTasks();
+
+        }
+        else
+        {
+            await TaskState.RefreshTasks(range);
+        }
+
+        Tasks = TaskState.Tasks;
+        DailyTasks = Tasks.Where(x => x.EndDate.Day == DateTime.Now.Day).ToList();
+        sessions = TaskState.Sessions.ToDictionary(x => x.Id, x => x.Name);
+        Goals = TaskState.Sessions
+        .Select(x => new GoalItem(
+            x.Name,
+            TaskState.CompletedCount[x.Id][0],
+            TaskState.CompletedCount[x.Id][1],
+            "green"
+        ))
+        .ToList();
+        await InvokeAsync(StateHasChanged);
+    }
 
     private async Task ToggleTask(ToDoTask task, bool isChecked)
     {
@@ -309,8 +360,29 @@
             return "0/0";
 
         return $"{ts.Count(x => x.IsCompleted)}/{ts.Count}";
+    }  
+
+    private async Task OpenSessionModal()
+    {
+        newSessionName = "";
+        await sessionModal.Show();
     }
 
-    record SessionItem(string Name, string Start, string End, double Score, string Color);
-    record GoalItem(string Name, int Current, int Target, string Accent);
+    private async Task CloseSessionModal()
+    {
+        await sessionModal.Hide();
+    }
+
+    private async Task CreateSession()
+    {
+        if (string.IsNullOrWhiteSpace(newSessionName))
+            return;
+
+        // Add your session here
+        var session = await TaskState.CreateSession(new Session(0,TaskState.UserId ,newSessionName));
+        await RefreshDashboard(session.Id);
+
+        await sessionModal.Hide();
+    }
+
 }
