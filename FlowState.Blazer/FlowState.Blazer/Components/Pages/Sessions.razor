@@ -1,0 +1,69 @@
+﻿@using Functionality;
+@inherits BaseSessions
+@page "/sessions"
+@rendermode InteractiveServer
+
+
+<Container Fluid>  
+    <Column ColumnSize="ColumnSize.Is12">
+        <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
+            <CardHeader>
+                <Div Flex="Flex.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
+                    <CardTitle Margin="Margin.Is0">Session list</CardTitle>
+                    <Div Style="flex:1; max-width:600px;">
+                        <TextInput @bind-Value="@searchTerm"
+                        @onInput="@(() => StateHasChanged())"
+                        Placeholder="Search sessions..." />
+                    </Div>                   
+                </Div>
+            </CardHeader>
+            <CardBody>
+                <Field>
+                    <Addons Class="gap-1">
+                        <Div Style="width:89%">
+                            <Addon AddonType="AddonType.Body" >
+                                <Validations @ref="nameValidations" Mode="ValidationMode.Manual">
+                                    <Validation Validator="@ValidationRule.IsNotEmpty">
+                                        <TextInput @bind-Value="@name" Placeholder="Add Name"></TextInput>
+                                    </Validation>
+                                </Validations>
+                            </Addon>
+                        </Div>
+                        <Addon AddonType="AddonType.End" Style="width:10%">
+                            <Button Color="Color.Primary" Clicked="@OnAddSession" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                                <Icon Name="IconName.Add" />
+                                Add Session
+                            </Button>
+                        </Addon>
+                    </Addons>
+                </Field>
+            </CardBody>
+            <CardBody Padding="Padding.Is0.OnY">
+                @if (FilteredCount == 0)
+                {
+                    <Alert Color="Color.Light" Visible Margin="Margin.Is3.OnX.Is3.FromBottom">
+                        <AlertMessage>Empty :(</AlertMessage>
+                        <AlertDescription>Get Started By Creating Your First Session!</AlertDescription>
+                    </Alert>
+                }
+                else
+                {
+                    <ListGroup Flush>
+                        @foreach (var s in Sessions)
+                        {
+                            <SessionItem session="@s" LeaveClicked="@OnLeaveSession" RemoveClicked="@OnRemoveSession" OrderChanged="OrderSessions"/>
+                        }
+                    </ListGroup>
+                }
+            </CardBody>
+            <CardFooter class="mt-2">
+                <Div Style="height:30px;"Flex="Flex.Column.Row.OnDesktop.JustifyContent.Between.AlignItems.Start.AlignItems.Center.OnDesktop" Gap="Gap.Is3">
+                    
+                </Div>
+            </CardFooter>
+        </Card>
+    </Column>
+</Container>
+
+
+

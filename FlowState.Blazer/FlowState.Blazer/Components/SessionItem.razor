@@ -1,0 +1,124 @@
+﻿@inject TaskStateService TaskState
+
+<ListGroupItem>
+    <Div Flex="Flex.Row.OnDesktop.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
+        <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3" Style=" width:100%">           
+            <Div Style="width:90%">
+                @if (IsEdit)
+                {
+                    <Div Flex="Flex.Row" Class="gap-3">
+                        <Div Flex="Flex.Row.AlignItems.Center" Class="gap-1">
+                            <Label For="todoName">Name:</Label>
+                            <Addon AddonType="AddonType.Body">
+                                <Validations @ref="nameValidations" Mode="ValidationMode.Manual">
+                                    <Validation Validator="@ValidationRule.IsNotEmpty">
+                                        <TextInput ElementId="todoName" @bind-Value="@session.Name" Placeholder="Add a Name"></TextInput>
+                                    </Validation>
+                                </Validations>
+                            </Addon>
+                        </Div>                       
+                    </Div>
+                }
+                else
+                {
+                    <Div Flex=Flex.Column>
+                        <Text Style="font-weight:bold;">@session.Name</Text>                        
+                    </Div>
+                }
+                <Div Margin="Margin.Is1.FromTop">
+                    <Badge Style="@(session.AdminId == TaskState.UserId ? "background-color:darkgreen" : "background-color:darkorange")" Subtle Pill>
+                        @(session.AdminId == TaskState.UserId ? "Owner" : "Member")
+                    </Badge>
+                </Div>
+            </Div>
+        </Div>
+        <Div Class="d-flex gap-2">
+            @if (session.AdminId == TaskState.UserId)
+            {
+                @if (IsEdit)
+                {
+                    <Button Color="Color.Secondary" Outline Size="Size.Small" Clicked="@OnUpdatesession" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                        <Icon Name="IconName.Check" />
+                        Confirm
+                    </Button>
+                }
+                else
+                {
+                    <Button Color="Color.Secondary" Outline Size="Size.Small" Clicked="@OnUpdatesession" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                        <Icon Name="IconName.Pen" />
+                        Edit
+                    </Button>
+                }
+            }
+            @if (session.AdminId == TaskState.UserId)
+            {
+                <Button Color="Color.Danger" Outline Size="Size.Small" Clicked="@OnRemoveClicked" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                    <Icon Name="IconName.Delete" />
+                    Remove
+                </Button>
+            }
+            else
+            {
+                <Button Color="Color.Danger" Outline Size="Size.Small" Clicked="@OnLeaveClicked" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                    <Icon Name="IconName.MinusCircle" />
+                    Leave
+                </Button>
+            }
+        </Div>
+    </Div>
+</ListGroupItem>
+
+@code {
+
+    [Inject]
+    protected HttpClient Http { get; set; } = default!;
+
+    [Parameter] public Session session { get; set; }
+
+    [Parameter] public EventCallback<Session> LeaveClicked { get; set; }
+
+    [Parameter] public EventCallback<Session> RemoveClicked { get; set; }
+
+    [Parameter] public EventCallback OrderChanged { get; set; }
+
+
+    public bool IsEdit { get; set; }
+
+    protected Validations nameValidations;
+  
+
+    private Task OnRemoveClicked()
+        => RemoveClicked.InvokeAsync(session);
+
+    private Task OnLeaveClicked()
+        => LeaveClicked.InvokeAsync(session);
+
+    protected async Task OnUpdatesession()
+    {
+
+        if (IsEdit && await nameValidations.ValidateAll() )
+        {
+            Console.WriteLine("Pressed");
+            session.Name = session.Name?.Trim();
+            await OrderChanged.InvokeAsync();
+
+            try
+            {
+                await Http.PutAsJsonAsync($"/api/sessions/{session.Id}", session);
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            await nameValidations.ClearAll();
+            
+
+        }
+
+        IsEdit = !IsEdit;
+
+    }
+
+
+}

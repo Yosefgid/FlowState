@@ -81,7 +81,7 @@ namespace FlowState.Blazer.Components.Functionality
             }
         }
 
-        public async Task RefreshSessions()
+        public async Task RefreshSessions(bool isRaw)
         {
             try
             {
@@ -90,8 +90,12 @@ namespace FlowState.Blazer.Components.Functionality
                 {
                     Sessions.Clear();
                     Sessions.AddRange(response);
-                    Sessions.Add(new Session(-1, UserId, "All Tasks"));
-                    Sessions.Add(new Session(0, UserId, "Personal"));
+
+                    if (!isRaw)
+                    {
+                        Sessions.Add(new Session(-1, UserId, "All Tasks"));
+                        Sessions.Add(new Session(0, UserId, "Personal"));
+                    }
                     
 
                 }

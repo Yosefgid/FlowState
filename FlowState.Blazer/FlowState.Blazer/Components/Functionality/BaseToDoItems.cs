@@ -84,7 +84,7 @@ namespace FlowState.Blazer.Components.Functionality
         protected override async Task OnInitializedAsync()
         {
             await TaskState.RefreshTasks();
-            await TaskState.RefreshSessions();
+            await TaskState.RefreshSessions(false);
 
             TaskState.Sessions.ForEach(x => sessions.Add(x.Id, x.Name));
             todos = TaskState.Tasks;
@@ -164,7 +164,7 @@ namespace FlowState.Blazer.Components.Functionality
             if (await nameValidations.ValidateAll() && await descValidations.ValidateAll())
             {
                 Console.WriteLine("Pressed");
-                ToDoTask task = new(TaskState.UserId,name?.Trim(), description?.Trim(), "11dsfsdf2");
+                ToDoTask task = new(TaskState.UserId,name?.Trim(), description?.Trim(), null);
                 task.SessionId = selectedSession == -1 ? 0 : selectedSession; 
                 todos.Add(task);
                 OrderTodos();
