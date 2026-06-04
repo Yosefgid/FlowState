@@ -36,7 +36,7 @@ public class ToDoTaskControllerTests
     [TearDown]
     public void TearDown()
     {
-        taskController.Dispose();
+        //taskController.Dispose();
     }
 
     [Test]

@@ -1,7 +1,9 @@
-﻿using FlowState.Models;
+﻿using FlowState.Blazer.Services;
+using FlowState.Models;
 using Microsoft.AspNetCore.Components;
 using FlowState.Blazer.Services;
 using System.Text.Json;
+using System.Net.Http.Headers;
 
 namespace FlowState.Blazer.Components.Functionality
 {
@@ -9,12 +11,15 @@ namespace FlowState.Blazer.Components.Functionality
     {
 
         private readonly HttpClient Http;
+        private readonly TokenService _tokenService;
 
         public int UserId { get; set; }
 
-        public TaskStateService(HttpClient http)
+        
+        public TaskStateService(HttpClient http, TokenService tokenService)
         {
             Http = http;
+            _tokenService = tokenService;
         }
         public List<ToDoTask> Tasks { get; set; } = new() {
             new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1").setEndDate(DateTime.Now),
@@ -32,10 +37,17 @@ namespace FlowState.Blazer.Components.Functionality
         public Dictionary<int, int[]> CompletedCount { get; set; }
 
 
-
+        private async Task SetAuthHeader()
+        {
+            var token = await _tokenService.GetTokenAsync();
+            if (!string.IsNullOrEmpty(token))
+                Http.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", token);
+        }
 
         public async Task RefreshTasks()
         {
+            await SetAuthHeader();
             try
             {
                 var response = await Http.GetFromJsonAsync<List<ToDoTask>>($"/api/tasks/user/{UserId}");
@@ -140,6 +152,7 @@ namespace FlowState.Blazer.Components.Functionality
 
         public async Task OnCheckedChanged(ToDoTask Todo, bool isChecked , EventCallback<bool> StatusChanged)
         {
+            await SetAuthHeader();
             Todo.IsCompleted = isChecked;
 
             Console.WriteLine("Pressed");
@@ -161,6 +174,8 @@ namespace FlowState.Blazer.Components.Functionality
 
         public async Task OnCheckedChanged(ToDoTask Todo, bool isChecked)
         {
+
+            await SetAuthHeader();
             Todo.IsCompleted = isChecked;
 
             Console.WriteLine("Pressed");

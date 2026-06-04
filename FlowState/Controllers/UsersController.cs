@@ -10,7 +10,7 @@ namespace FlowState.Controllers
     
     [ApiController]
     [Route("api/[controller]")]
-    public class UsersController : ControllerBase
+    public class UsersController : AuthorizedControllerBase
     {
         private readonly IUserServices _userServices;
         public UsersController(IUserServices userServices)
@@ -84,15 +84,7 @@ namespace FlowState.Controllers
             return Ok(updated);
         }
 
-        private int? GetLoggedInUserId()
-        {
-            //Get the UserId from the token, if automatic translation is off it will fallback to using "sub" to find UserId
-            //returns null if sub does not exisit 
-            var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                      ?? User.FindFirst("sub")?.Value;
-
-            return int.TryParse(claim, out var id) ? id : null;
-        }
+       
 
 
     }

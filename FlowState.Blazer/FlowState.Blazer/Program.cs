@@ -29,8 +29,14 @@ builder.Services.AddScoped<TaskStateService>();
 builder.Services.AddScoped(sp =>
     new HttpClient
     {
-        BaseAddress = new Uri("http://localhost:5170")
+        BaseAddress = new Uri("https://localhost:5171")
     });
+
+//builder.Services.AddScoped(sp =>
+//    new HttpClient
+//    {
+//        BaseAddress = new Uri("http://localhost:5170")
+//    });
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
