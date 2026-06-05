@@ -22,6 +22,9 @@ namespace FlowState.Blazer.Components.Functionality
 
         public bool loaded = false;
 
+        public bool copied;
+
+
         protected List<Session> sessions { get; set; } = new();
 
         
@@ -56,6 +59,7 @@ namespace FlowState.Blazer.Components.Functionality
             
 
         }
+
 
         public void OrderSessions()
         {
@@ -111,6 +115,19 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 Console.WriteLine(e.Message);
             }
+        }
+
+
+        public async Task LinkCopied()
+        {
+           
+            copied = true;
+
+            await Task.Delay(10000);
+
+            copied = false;
+
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

@@ -5,6 +5,17 @@
 
 
 <Container Fluid>  
+    <Alert Color="Color.Success" @bind-Visible="@copied" Flex="Flex.JustifyContent.Between">
+        <Div>
+            <AlertMessage>
+                Alert.
+            </AlertMessage>
+            <AlertDescription>
+                Link has successfully been copied!
+            </AlertDescription>          
+        </Div>
+        <CloseButton />
+    </Alert>
     <Column ColumnSize="ColumnSize.Is12">
         <Card Shadow="Shadow.Default" Margin="Margin.Is4.OnY">
             <CardHeader>
@@ -51,7 +62,7 @@
                     <ListGroup Flush>
                         @foreach (var s in Sessions)
                         {
-                            <SessionItem session="@s" LeaveClicked="@OnLeaveSession" RemoveClicked="@OnRemoveSession" OrderChanged="OrderSessions"/>
+                            <SessionItem session="@s"  LinkCopied="@LinkCopied" LeaveClicked="@OnLeaveSession" RemoveClicked="@OnRemoveSession" OrderChanged="OrderSessions"/>
                         }
                     </ListGroup>
                 }

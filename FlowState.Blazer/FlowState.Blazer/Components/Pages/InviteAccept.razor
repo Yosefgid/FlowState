@@ -1,0 +1,94 @@
+﻿@page "/invite/{Token}"
+
+@using Blazorise
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Session Invitation</PageTitle>
+
+@if (isLoading)
+{
+    <Card Class="mx-auto mt-5" Style="max-width:500px;">
+        <CardBody Class="text-center">           
+            <Text Class="mt-3">
+                Joining session...
+            </Text>
+        </CardBody>
+    </Card>
+}
+else if (joinSuccessful)
+{
+    <Card Class="mx-auto mt-5">
+        <CardBody Class="text-center">
+
+            <Icon Name="IconName.CheckCircle"
+                  TextColor="TextColor.Success"
+                  Style="font-size:4rem;" />
+
+            <Heading Size="HeadingSize.Is4" Class="mt-3">
+                Invitation Accepted
+            </Heading>
+
+            <Div Flex="Flex.Column.AlignContent.Center">
+                <Text Class="mb-4">
+                    You have successfully joined the session.
+                </Text>
+
+                <Button Color="Color.Primary"
+                        Clicked="@(() => Navigation.NavigateTo("/sessions"))" Style = "max-width: 20%">
+                    View Sessions
+                </Button>
+            </Div>
+        </CardBody>
+    </Card>
+}
+else
+{
+    <Card Class="mx-auto mt-5">
+        <CardBody Class="text-center">
+
+            <Icon Name="IconName.TimesCircle"
+                  TextColor="TextColor.Danger"
+                  Style="font-size:4rem;" />
+
+            <Heading Size="HeadingSize.Is4" Class="mt-3">
+                Invitation Invalid
+            </Heading>
+
+            <Text Class="mb-4">
+                This invitation has expired or is no longer valid.
+            </Text>
+
+            <Button Color="Color.Secondary"
+                    Clicked="@(() => Navigation.NavigateTo("/"))">
+                Go Home
+            </Button>
+
+        </CardBody>
+    </Card>
+}
+
+@code {
+
+    [Parameter]
+    public string Token { get; set; } = string.Empty;
+
+    private bool isLoading = true;
+    private bool joinSuccessful;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await Http.PostAsync($"api/sessions/invite/{Token}/accept",null);
+
+            joinSuccessful = response.IsSuccessStatusCode;
+        }
+        catch
+        {
+            joinSuccessful = false;
+        }
+
+        isLoading = false;
+    }
+}

@@ -1,8 +1,9 @@
 ﻿@inject TaskStateService TaskState
+@inject IJSRuntime JS
 
 <ListGroupItem>
     <Div Flex="Flex.Row.OnDesktop.JustifyContent.Between.AlignItems.Center" Gap="Gap.Is3">
-        <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3" Style=" width:100%">           
+        <Div Flex="Flex.AlignItems.Start" Gap="Gap.Is3" Style=" width:70%">           
             <Div Style="width:90%">
                 @if (IsEdit)
                 {
@@ -32,9 +33,14 @@
                 </Div>
             </Div>
         </Div>
-        <Div Class="d-flex gap-2">
+        <Div Class="d-flex gap-2" >
             @if (session.AdminId == TaskState.UserId)
             {
+
+                <Button Color="Color.Secondary" Outline Size="Size.Small" Clicked="@OnLinkCopied"  Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
+                    <Icon Name="IconName.Link" />
+                    Get Invitation Link
+                </Button>
                 @if (IsEdit)
                 {
                     <Button Color="Color.Secondary" Outline Size="Size.Small" Clicked="@OnUpdatesession" Flex="Flex.InlineFlex.AlignItems.Center" Gap="Gap.Is2">
@@ -75,6 +81,8 @@
 
     [Parameter] public Session session { get; set; }
 
+    [Parameter] public EventCallback LinkCopied { get; set; }
+
     [Parameter] public EventCallback<Session> LeaveClicked { get; set; }
 
     [Parameter] public EventCallback<Session> RemoveClicked { get; set; }
@@ -92,6 +100,8 @@
 
     private Task OnLeaveClicked()
         => LeaveClicked.InvokeAsync(session);
+
+
 
     protected async Task OnUpdatesession()
     {
@@ -118,6 +128,28 @@
 
         IsEdit = !IsEdit;
 
+    }
+
+    protected async Task OnLinkCopied()
+    {
+            try
+            {
+                var response = await Http.PostAsJsonAsync(
+                    $"/api/sessions/{session.Id}/invite",
+                    (object?)null);
+
+                var inviteLink = await response.Content.ReadAsStringAsync();
+
+                await JS.InvokeVoidAsync(
+                    "navigator.clipboard.writeText",
+                    inviteLink);
+
+                await LinkCopied.InvokeAsync();
+                }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }     
     }
 
 

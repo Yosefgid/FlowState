@@ -7,7 +7,7 @@ namespace FlowState.Controllers
 {
     [Route("api/sessions")]
     [ApiController]
-    public class SessionController : Controller
+    public class SessionController : AuthorizedControllerBase
     {
         private ISessionService _sessionService;
 
@@ -79,7 +79,7 @@ namespace FlowState.Controllers
 
             _sessionService.CreateSessionInvite(invite);
 
-            return Ok($"https://yourapp.com/invite/{invite.Token}");
+            return Ok($"https://localhost:5171/invite/{invite.Token}");
         }
 
         [HttpPost("invite/{token}/accept")]
@@ -87,12 +87,14 @@ namespace FlowState.Controllers
         {
             var invite = _sessionService.GetInvite(token);
 
-            if (invite == null)
+            var userId = GetLoggedInUserId();
+
+            if (invite == null || userId == null)
                 return BadRequest();
 
-            var userId = 0 ;// change
+            
 
-            _sessionService.AddSessionUser(invite.SessionId, userId);
+            _sessionService.AddSessionUser(invite.SessionId, userId.Value);
 
             return Ok();
         }
