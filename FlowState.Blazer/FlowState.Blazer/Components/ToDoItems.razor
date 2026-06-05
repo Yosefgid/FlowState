@@ -109,6 +109,16 @@
                                     Add task
                                 </Button>
                             </Addon>
+                            <Addons Class="gap-1 mt-2">
+                                <Addon AddonType="AddonType.Start">
+                                    <AddonLabel>Due Date</AddonLabel>
+                                </Addon>
+                                <Addon AddonType="AddonType.Body">
+                                    <DatePicker TValue="DateTime?" Placeholder="@DateTime.Now.ToString()"
+                                                @bind-Date="@endDate"
+                                                InputMode="DateInputMode.DateTime" />
+                                </Addon>
+                            </Addons>
                         </Addons>
                     </Field>
                 </CardBody>

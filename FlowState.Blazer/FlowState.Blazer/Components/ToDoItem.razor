@@ -43,6 +43,14 @@
                             @Todo.Description
                         </Text>
                     </Div>
+                    <Div Flex="Flex.Row" Gap="Gap.Is2" Margin="Margin.Is1.FromTop">
+                        <Small TextColor="TextColor.Muted">
+                            Start: @(Todo.StartDate == default ? "—" : Todo.StartDate.ToString("dd MMM yyyy HH:mm"))
+                        </Small>
+                        <Small TextColor="TextColor.Muted">
+                            Due: @(Todo.EndDate == default ? "—" : Todo.EndDate.ToString("dd MMM yyyy HH:mm"))
+                        </Small>
+                    </Div>
                 }             
                 <Div Margin="Margin.Is1.FromTop">
                     <Badge Style="@(Todo.IsCompleted ? "background-color:darkgreen" : "background-color:darkorange")" Subtle Pill>
