@@ -94,23 +94,36 @@
 
                 }
             </div>
-           <div class="card-link border-danger">
-               <div class="card-body">
-                   <h5 class="text-danger">Delete Account </h5>
-                   <p class="text-muted">Permanently delete your account and all associated data.</p>
+        <div class="card border-danger">
+            <div class="card-body">
+                <h5 class="text-danger">Delete Account</h5>
+                <p class="text-muted">Permanently delete your account and all associated data.</p>
                 @if (!_confirmingDelete)
                 {
-                    <button class="btn btn-outline-danger" @onclick="() => _confirmingDelete = true" disabled="@_busy">Delete My Account!</button>
-                } else
+                    <button class="btn btn-outline-danger" @onclick="() => _confirmingDelete = true" disabled="@_busy">
+                        Delete My Account!
+                    </button>
+                }
+                else
                 {
                     <div class="alert alert-danger">We are sad to see you go 😔! Are you sure?</div>
-                    <button class="btn btn-secondary" @onclick="() => _confirmingDelete = false" disabled="@_busy">Cancel 😊</button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger" @onclick="DeleteAccount" disabled="@_busy">
+                            Yes, delete my account
+                        </button>
+                        <button class="btn btn-secondary" @onclick="() => _confirmingDelete = false" disabled="@_busy">
+                            Cancel 😊
+                        </button>
+                    </div>
                 }
             </div>
+        </div>
 
-           </div>
+
+           
         
     }
+
 
 
 
