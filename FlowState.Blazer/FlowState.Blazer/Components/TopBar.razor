@@ -1,4 +1,5 @@
-﻿@inject NavigationManager Navigation
+﻿@implements IDisposable
+@inject NavigationManager Navigation
 
 <div class="topbar d-flex align-items-center justify-content-left px-4 py-3 gap-5">
 
@@ -15,45 +16,74 @@
 </div>
 
 @code {
-
+  
     private string CurrentPageTitle => GetPageTitle();
 
     private string CurrentPageSubtitle => GetPageSubtitle();
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 
     private string GetPageTitle()
     {
         var path = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
 
-        return path switch
-        {
-            "" => "Dashboard",
-            "dashboard" => "Dashboard",
-            "tasks" => "Tasks",
-            "sessions" => "Sessions",
-            "calendar" => "Calendar",
-            "reports" => "Reports",
-            "goals" => "Goals",
-            "habits" => "Habits",
-            "settings" => "Settings",
-            _ => "FlowDesk"
-        };
+        if (string.IsNullOrEmpty(path) || path == "dashboard")
+            return "Dashboard";
+
+        if (path.StartsWith("tasks"))
+            return "Tasks";
+
+        if (path == "sessions")
+            return "Sessions";
+
+        if (path == "calendar")
+            return "Calendar";
+
+        if (path == "profile")
+            return "Profile";
+
+        if (path.StartsWith("eisen"))
+            return "Eisenhower Matrix";
+
+        return "FlowState";
     }
 
     private string GetPageSubtitle()
     {
         var path = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+      
 
-        return path switch
-        {
-            "dashboard" => "Track your productivity at a glance",
-            "tasks" => "Manage your tasks and priorities",
-            "sessions" => "View and manage focus sessions",
-            "calendar" => "Manage your schedule and events",
-            "reports" => "Analyse productivity trends",
-            "goals" => "Track long-term objectives",
-            "habits" => "Build better routines",
-            "settings" => "Configure your application",
-            _ => ""
-        };
+        if (string.IsNullOrEmpty(path) || path == "dashboard")
+            return "Track your productivity at a glance";
+
+        if (path.StartsWith("tasks"))
+            return "Manage your tasks and priorities";
+
+        if (path == "sessions")
+            return "View and manage focus sessions";
+
+        if (path == "calendar")
+            return "Manage your schedule and events";
+
+        if (path == "profile")
+            return "Configure your user";
+
+        if (path.StartsWith("eisen"))
+            return "Categorise your tasks to maximise productivity";
+
+        return "FlowState";      
     }
 }

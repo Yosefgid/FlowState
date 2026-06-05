@@ -1,0 +1,47 @@
+﻿@using FlowState.Models
+@inject IJSRuntime JS
+
+@inject IJSRuntime JS
+
+<div style="position: relative; height: 373px; width: 100%;">
+    <canvas id="weeklyCompletionChart" role="img"
+            aria-label="Bar chart of tasks completed per day this week" />
+</div>
+
+@code {
+
+    [Inject] public TaskStateService TaskState { get; set; } = default!;
+
+    [Parameter] public int currentSession { get; set; } = -1;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // Re-render on every render pass, not just firstRender,
+        // so the chart updates when Tasks changes (e.g. RefreshDashboard)
+        if(currentSession == -1)
+        {
+            await TaskState.RefreshTasks();
+
+        }
+        else
+        {
+            await TaskState.RefreshTasks(currentSession);
+        }
+        await JS.InvokeVoidAsync("renderWeeklyChart", "weeklyCompletionChart", GetWeeklyCounts());
+    }
+
+    private int[] GetWeeklyCounts()
+    {
+        var counts = new int[7];
+        var monday = DateTime.Today.AddDays(-(((int)DateTime.Today.DayOfWeek + 6) % 7));
+
+        foreach (var task in TaskState.Tasks)
+        {
+            if (!task.IsCompleted || task.TimeCompleted is null) continue;
+            var diff = (task.TimeCompleted.Value.Date - monday).Days;
+            if (diff >= 0 && diff < 7)
+                counts[diff]++;
+        }
+        return counts;
+    }
+}
