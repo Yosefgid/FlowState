@@ -1,11 +1,13 @@
 ﻿using FlowState.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FlowState.Controllers
 {
+    [Authorize]
     [Route("api/google-tasks")]
     [ApiController]
-    public class GoogleToDoTaskController : ControllerBase
+    public class GoogleToDoTaskController : AuthorizedControllerBase
     {
         private readonly IGoogleService _googleService;
 
@@ -17,26 +19,50 @@ namespace FlowState.Controllers
         [HttpGet("status")]
         public async Task<IActionResult> Status()
         {
-            var userId = GetLocalUserId();
+            var userId = GetLoggedInUserId();
 
-            var isConnected = await _googleService.IsGoogleCalendarConnectedAsync(userId);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var isConnected = await _googleService
+                .IsGoogleCalendarConnectedAsync(userId.Value.ToString());
 
             return Ok(new { isConnected });
         }
 
-        [HttpGet("connect")]
-        public IActionResult Connect()
+        [HttpGet("auth-url")]
+        public IActionResult GetAuthUrl()
         {
-            var userId = GetLocalUserId();
+            var userId = GetLoggedInUserId();
 
-            var authUrl = _googleService.GetGoogleAuthUrl(userId);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
 
-            return Redirect(authUrl);
+            var authUrl = _googleService.GetGoogleAuthUrl(userId.Value.ToString());
+
+            return Ok(new { authUrl });
         }
 
         [HttpGet("callback")]
-        public async Task<IActionResult> Callback([FromQuery] string code, [FromQuery] string state)
+        [AllowAnonymous]
+        public async Task<IActionResult> Callback(
+            [FromQuery] string code,
+            [FromQuery] string state)
         {
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return BadRequest("Missing Google authorization code.");
+            }
+
+            if (string.IsNullOrWhiteSpace(state))
+            {
+                return BadRequest("Missing user state.");
+            }
+
             await _googleService.ConnectGoogleCalendarAsync(code, state);
 
             return Redirect("http://localhost:5270/calendar");
@@ -45,16 +71,17 @@ namespace FlowState.Controllers
         [HttpPost("import")]
         public async Task<IActionResult> ImportGoogleEvents()
         {
-            var userId = GetLocalUserId();
+            var userId = GetLoggedInUserId();
 
-            var importedTasks = await _googleService.ImportGoogleCalendarEventsAsync(userId);
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            var importedTasks = await _googleService
+                .ImportGoogleCalendarEventsAsync(userId.Value.ToString());
 
             return Ok(importedTasks);
-        }
-
-        private string GetLocalUserId()
-        {
-            return User.Identity?.Name ?? "local-user";
         }
     }
 }
