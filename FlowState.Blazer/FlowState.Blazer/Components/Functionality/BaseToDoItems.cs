@@ -34,6 +34,8 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected int selectedSession = -1;
 
+        protected DateTime? endDate = DateTime.Now;
+
         public bool loaded = false;
 
         protected Dictionary<int, string> sessions { get; set; } = new();
@@ -182,6 +184,7 @@ namespace FlowState.Blazer.Components.Functionality
                 Console.WriteLine("Pressed");
                 ToDoTask task = new(TaskState.UserId,name?.Trim(), description?.Trim(), null);
                 task.SessionId = selectedSession == -1 ? 0 : selectedSession;
+                task.setEndDate(endDate ?? DateTime.Now);
                 description = null;
                 name = null;
                 try
@@ -208,6 +211,7 @@ namespace FlowState.Blazer.Components.Functionality
 
                 name = null;
                 description = null;
+                endDate = DateTime.Now;
                 await nameValidations.ClearAll();
                 await descValidations.ClearAll();
 
