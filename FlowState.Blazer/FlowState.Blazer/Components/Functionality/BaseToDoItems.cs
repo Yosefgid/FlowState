@@ -181,7 +181,7 @@ namespace FlowState.Blazer.Components.Functionality
             {
                 Console.WriteLine("Pressed");
                 ToDoTask task = new(TaskState.UserId,name?.Trim(), description?.Trim(), null);
-                task.SessionId = selectedSession == -1 ? 0 : selectedSession;
+                task.SessionId = selectedSession == -1 ? 0 : selectedSession; 
                 description = null;
                 name = null;
                 try
