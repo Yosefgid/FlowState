@@ -7,6 +7,7 @@ namespace FlowState.Services
     public interface IToDoTaskService
     {
         public List<ToDoTask> GetAllTasks();
+
         public ToDoTask? GetTask(int id);
 
         public ToDoTask AddTask(ToDoTask task);
