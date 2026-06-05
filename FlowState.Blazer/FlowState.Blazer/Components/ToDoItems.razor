@@ -46,6 +46,35 @@
                             @onInput="@(() => StateHasChanged())"
                             Placeholder="Search tasks..." />
                         </Div>
+                        <Dropdown>
+                            <DropdownToggle Color="Color.Secondary" Outline>
+                                <Icon Name="IconName.Folder" Class="me-2" />
+                                @if (!loaded)
+                                {
+                                    <Text>Loading...</Text>
+                                }
+                                else
+                                {
+                                    <Text>@sessions[selectedSession]</Text>
+                                }
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                @if (sessions == null)
+                                {
+                                    <Div>Loading...</Div>
+                                }
+                                else
+                                {
+                                    @foreach (var r in sessions)
+                                    {
+                                        <DropdownItem Active="r.Value == sessions[selectedSession]"
+                                                      Clicked="() => SessionFilter(r.Key)">
+                                            @r.Value
+                                        </DropdownItem>
+                                    }
+                                }
+                            </DropdownMenu>
+                        </Dropdown>
                         <Buttons Role="ButtonsRole.Addons">
                             <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.All))" Active="@(filter == Filter.All)">All</Button>
                             <Button Color="Color.Secondary" Clicked="@(() => SetFilter(Filter.Active))" Active="@(filter == Filter.Active)">Active</Button>

@@ -1,10 +1,11 @@
 ﻿using FlowState.Models;
 using FlowState.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlowState.Controllers
 {
-    [Route("session")]
+    [Route("api/sessions")]
     [ApiController]
     public class SessionController : Controller
     {
@@ -70,14 +71,40 @@ namespace FlowState.Controllers
             return NoContent();
         }
 
-        // POST session/5/user/10
-        [HttpPost("{sessionId}/user/{userId}")]
-        public ActionResult<SessionUser> AddSessionUser(int sessionId, int userId)
+        [HttpPost("{sessionId}/invite")]
+        public ActionResult<string> CreateInvite(int sessionId)
         {
-            var sessionUser = _sessionService.AddSessionUser(sessionId, userId);
+            var invite = new SessionInvite(sessionId);
+           
 
-            return Ok(sessionUser);
+            _sessionService.CreateSessionInvite(invite);
+
+            return Ok($"https://yourapp.com/invite/{invite.Token}");
         }
+
+        [HttpPost("invite/{token}/accept")]
+        public ActionResult AcceptInvite(string token)
+        {
+            var invite = _sessionService.GetInvite(token);
+
+            if (invite == null)
+                return BadRequest();
+
+            var userId = 0 ;// change
+
+            _sessionService.AddSessionUser(invite.SessionId, userId);
+
+            return Ok();
+        }
+
+        //// POST session/5/user/10
+        //[HttpPost("{sessionId}/user/{userId}")]
+        //public ActionResult<SessionUser> AddSessionUser(int sessionId, int userId)
+        //{
+        //    var sessionUser = _sessionService.AddSessionUser(sessionId, userId);
+
+        //    return Ok(sessionUser);
+        //}
 
         // GET session-user/5
         [HttpGet("session-user/{sessionUserId}")]
@@ -101,10 +128,10 @@ namespace FlowState.Controllers
         }
 
         // DELETE session-user/5
-        [HttpDelete("session-user/{sessionUserId}")]
-        public IActionResult DeleteSessionUser(int sessionUserId)
+        [HttpDelete("{userId}/session-user/{sessionId}")]
+        public IActionResult DeleteSessionUser(int userId , int sessionId)
         {
-            var deleted = _sessionService.DeleteSessionUser(sessionUserId);
+            var deleted = _sessionService.DeleteSessionUser(userId,sessionId);
 
             if (!deleted)
                 return NotFound();

@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace FlowState.Controllers
 {
-    [Authorize]
+    
     [ApiController]
     [Route("api/[controller]")]
     public class UsersController : AuthorizedControllerBase

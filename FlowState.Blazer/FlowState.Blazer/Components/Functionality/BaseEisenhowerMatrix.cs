@@ -22,32 +22,21 @@ namespace FlowState.Blazer.Components.Functionality
         [Inject]
         protected HttpClient Http { get; set; } = default!;
 
+        [Parameter]
+        public string SessionId { get; set; } 
+
         public List<ToDoTask> Tasks { get; set; } = new();
 
-        
+
 
 
 
         // ── Lifecycle ────────────────────────────────────────────────────────────
 
-        protected override async Task OnInitializedAsync()
+        protected override async Task OnParametersSetAsync()
         {
-            // Assign any new tasks that don't yet have a quadrant.
-            // Default: DoFirst — caller can pre-assign via OnTaskQuadrantChanged.
-
-            var token = await TokenService.GetTokenAsync();
-            if (!string.IsNullOrWhiteSpace(token))
-                Http.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", token);
-
-            await TaskState.RefreshTasks();
-            Tasks = TaskState.Tasks;
-            await InvokeAsync(StateHasChanged);
-
-
-
-            /*
-            await TaskState.RefreshTasks();
+          
+            await TaskState.RefreshTasks(int.Parse(SessionId));
           
             Tasks = TaskState.Tasks;
             foreach (var task in TaskState.Tasks)

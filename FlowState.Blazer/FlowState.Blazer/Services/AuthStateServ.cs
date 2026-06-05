@@ -1,19 +1,27 @@
-﻿using System.Text.Json;
+﻿using FlowState.Blazer.Components.Functionality;
 using FlowState.Blazer.Models.Auth;
+
+using Microsoft.AspNetCore.Components;
+using System.Text.Json;
+
 namespace FlowState.Blazer.Services
 {
     public class AuthStateServ
     {
         private readonly TokenService _tokenService;
+        private readonly TaskStateService _taskState;
+
         public event Action? OnAuthStateChanged;
 
+       
         public string? Username { get; private set; }
         public string? Email { get; private set; }
         public bool IsLoggedIn => !string.IsNullOrEmpty(Username);
 
-        public AuthStateServ(TokenService tokenService)
+        public AuthStateServ(TokenService tokenService, TaskStateService taskState)
         {
             _tokenService = tokenService;
+            _taskState = taskState;
         }
 
         public async Task InitialiseAsync()
@@ -33,6 +41,9 @@ namespace FlowState.Blazer.Services
             }
             Username = claims.GetValueOrDefault("username");
             Email = claims.GetValueOrDefault("email");
+            string? stringId = claims.GetValueOrDefault("sub");
+            _taskState.UserId = int.Parse(stringId);
+           
         }
 
         public void SetUser(string username, string email)

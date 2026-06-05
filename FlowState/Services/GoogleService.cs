@@ -67,7 +67,7 @@ namespace FlowState.Services
             var startDate = GetGoogleEventDateTime(googleEvent.Start);
             var endDate = GetGoogleEventDateTime(googleEvent.End);
 
-            return new ToDoTask(
+            return new ToDoTask(0,//TODO replace with relevant userId
                 googleEvent.Summary ?? "Untitled Google Event",
                 googleEvent.Description ?? "",
                 googleEvent.Id ?? ""              

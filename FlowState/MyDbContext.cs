@@ -13,6 +13,8 @@ namespace FlowState
 
         public DbSet<Session> Sessions { get; set; }
 
+        public DbSet<SessionInvite> SessionInvites { get; set; }
+
         public DbSet<SessionUser> SessionUsers { get; set; }
 
         public MyDbContext(DbContextOptions<MyDbContext> options)

@@ -1,7 +1,9 @@
-﻿using FlowState.Models;
+﻿using FlowState.Controllers;
+using FlowState.Models;
 using FlowState.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
@@ -15,9 +17,12 @@ namespace FlowState.Controllers
     public class ToDoTaskController : AuthorizedControllerBase
     {
         private readonly IToDoTaskService _taskService;
-        public ToDoTaskController(IToDoTaskService TaskService)
-        {
+
+
+        public ToDoTaskController(IToDoTaskService TaskService) 
+        { 
             _taskService = TaskService;
+                
         }
         [HttpGet("test/{id}")]
        
@@ -29,6 +34,13 @@ namespace FlowState.Controllers
             var userId = GetLoggedInUserId();
             if (userId == null) return Unauthorized();
             return Ok(_taskService.GetAllTasksByUser(userId.Value));
+        }
+
+        [HttpGet("user/{id}")]
+        public IActionResult GetAllUserTasks(int id)
+        {
+            return Ok(_taskService.GetAllRelevantTasks(id));
+           
         }
 
         [HttpGet("session/{sessionId}")]
