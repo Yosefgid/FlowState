@@ -38,14 +38,7 @@ namespace FlowState.Blazer.Components.Functionality
 
         protected Dictionary<int, string> sessions { get; set; } = new();
 
-        protected List<ToDoTask> todos = new() { 
-            new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1"),
-            new ToDoTask(0,"Study EF Core", "Review tracking, migrations, and relationships", "google-2"),
-            new ToDoTask(0,"Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3"),
-            new ToDoTask(0,"Frontend UI", "Build Blazor or React task UI", "google-4"),
-            new ToDoTask(0,"Write Tests", "Add unit tests for service layer", "google-5")
-
-        };
+        protected List<ToDoTask> todos = new();
 
         protected IEnumerable<ToDoTask> Todos
         {

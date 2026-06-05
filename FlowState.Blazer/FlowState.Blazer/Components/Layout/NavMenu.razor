@@ -12,7 +12,7 @@
         <BarItem>
             <BarLink>
                 <Icon Name="IconName.Bolt" class="me-2 text-cyan" />
-                <span class="logo-text">FlowDesk</span>
+                <span class="logo-text">FlowState</span>
             </BarLink>
         </BarItem>
     </BarBrand>
@@ -90,11 +90,16 @@
             {
                 <BarItem>
                     <div class="user-card mt-2">
-                        <Div Class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center avatar-initials">
-                            @GetInitials()
-                        </Div>
+                        <NavLink href="/profile" class="text-decoration-none">
+                            <Div Class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center avatar-initials">
+                                @GetInitials()
+                            </Div>
+                        
+                        </NavLink>
+                        
                         <div class="user-info ms-2">
                             <span class="user-name">@AuthStateService.Username</span>
+                            <NavLink href="/profile" class="text-decoration-none">My Profile</NavLink>
                             <span class="user-plan">@AuthStateService.Email</span>
                         </div>
                     </div>
