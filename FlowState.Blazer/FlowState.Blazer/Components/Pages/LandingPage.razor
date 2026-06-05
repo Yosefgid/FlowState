@@ -1,0 +1,102 @@
+﻿@page "/"
+@layout PublicLayout
+@inject NavigationManager Nav
+@using FlowState.Blazer.Services
+@inject TokenService TokenService
+
+<div class="landing">
+    <div class="landing-nav">
+        <a class="landing-btn landing-btn-ghost" href="/login">Login</a>
+        <a class="landing-btn landing-btn-solid" href="/register">Register</a>
+    </div>
+
+    <div class="landing-hero">
+        <h1 class="landing-brand"><i class="fas fa-bolt"></i> FlowState</h1>
+        <p class="landing-tagline">Welcome to a new level of productivity.</p>
+    </div>
+</div>
+@* Forgive me for in-line css  *@
+<style>
+    .landing {
+        position: fixed;
+        inset: 0;
+        background: #0a1a3f;
+        color: #fff;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .landing-nav {
+        display: flex;
+        justify-content: flex-end;
+        gap: .75rem;
+        padding: 1.5rem 2rem;
+    }
+
+    .landing-btn {
+        padding: .5rem 1.25rem;
+        border-radius: .5rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all .15s ease;
+    }
+
+    .landing-btn-ghost {
+        color: #fff;
+        border: 1px solid rgba(255,255,255,.5);
+    }
+
+        .landing-btn-ghost:hover {
+            background: rgba(255,255,255,.1);
+        }
+
+    .landing-btn-solid {
+        color: #0a1a3f;
+        background: #fff;
+    }
+
+        .landing-btn-solid:hover {
+            background: #e6e6e6;
+        }
+
+    .landing-hero {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 1rem;
+    }
+
+    .landing-brand {
+        color: #fff;
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+        .landing-brand .fa-bolt {
+            margin-right: .5rem;
+        }
+
+    .landing-tagline {
+        font-size: 1.25rem;
+        color: rgba(255,255,255,.8);
+        margin-top: 1rem;
+    }
+</style>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        var token = await TokenService.GetTokenAsync();
+        if (!string.IsNullOrWhiteSpace(token))
+            Nav.NavigateTo("/dashboard");
+    }
+}
+
+@code {
+
+}
