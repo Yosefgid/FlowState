@@ -45,7 +45,7 @@ namespace FlowState.Blazer.Components.Functionality
             }
             Console.WriteLine("Eisen");
 
-            await InvokeAsync(StateHasChanged);*/
+            await InvokeAsync(StateHasChanged);
 
         }
 
