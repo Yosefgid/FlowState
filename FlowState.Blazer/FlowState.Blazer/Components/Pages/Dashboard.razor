@@ -120,40 +120,26 @@
 
                         </Card>
 
-                        <Text>Eisenhower</Text>
+                        <Text>Eisenhower Matrix</Text>
                     </Div>
                     
                     <Div style=" text-align:center">
                         <Card Style="flex-shrink:0">
-                            <CardBody Class="module">
-
-
+                            <CardBody Class="module" >
+                                <WeeklyCompletionGraph currentSession="@selectedSession" />
                             </CardBody>
 
                         </Card>
-                        <Text>Eisenhower</Text>
+                        <Text>Completion Graph</Text>
                     </Div>
-
+                     
                     <Div style=" text-align:center">
                         <Card Style="flex-shrink:0">
-                            <CardBody Class="module">
-
-
+                            <CardBody Class="module p-3" Style="font-size:3rem; background-color: skyblue;" Flex="Flex.AlignItems.Center">
+                                <Text >@motivationalQuotes[random.Next(motivationalQuotes.Count)]</Text>
                             </CardBody>
-
                         </Card>
-                        <Text>Eisenhower</Text>
-                    </Div>
-
-                    <Div style=" text-align:center">
-                        <Card Style="flex-shrink:0">
-                            <CardBody Class="module">
-
-
-                            </CardBody>
-
-                        </Card>
-                        <Text>Eisenhower</Text>
+                        <Text>Motivation</Text>
                     </Div>
 
                 </CardBody>
@@ -276,8 +262,7 @@
 
     private string newSessionName = "";
 
-    private int nextId = 1;
-
+    private Random random = new();
 
 
     protected override async Task OnInitializedAsync()
@@ -384,5 +369,58 @@
 
         await sessionModal.Hide();
     }
+
+    List<string> motivationalQuotes = new List<string>
+    {
+        "Success is the sum of small efforts repeated day in and day out.",
+        "Don’t watch the clock; do what it does. Keep going.",
+        "The harder you work for something, the greater you’ll feel when you achieve it.",
+        "Dream it. Wish it. Do it.",
+        "Stay positive, work hard, make it happen.",
+        "Push yourself, because no one else is going to do it for you.",
+        "Great things never come from comfort zones.",
+        "Don’t stop when you’re tired. Stop when you’re done.",
+        "Wake up with determination. Go to bed with satisfaction.",
+        "Little things make big days.",
+        "It’s going to be hard, but hard does not mean impossible.",
+        "Sometimes we’re tested not to show our weaknesses, but to discover our strengths.",
+        "The key to success is to focus on goals, not obstacles.",
+        "Dream bigger. Do bigger.",
+        "Don’t limit your challenges. Challenge your limits.",
+        "Do something today that your future self will thank you for.",
+        "Doubt kills more dreams than failure ever will.",
+        "Work hard in silence, let success make the noise.",
+        "You are capable of amazing things.",
+        "Believe you can and you’re halfway there.",
+        "Discipline is choosing between what you want now and what you want most.",
+        "Success doesn’t just find you. You have to go out and get it.",
+        "The difference between ordinary and extraordinary is that little extra.",
+        "Keep going. Everything you need will come to you at the perfect time.",
+        "Don’t be afraid to give up the good to go for the great.",
+        "Hard work beats talent when talent doesn’t work hard.",
+        "Focus on progress, not perfection.",
+        "Your only limit is your mind.",
+        "If it doesn’t challenge you, it won’t change you.",
+        "Small steps every day lead to big results.",
+        "Do it with passion or not at all.",
+        "Success is not for the lazy.",
+        "Make today count.",
+        "Don’t wait for opportunity. Create it.",
+        "Be stronger than your excuses.",
+        "The pain you feel today will be the strength you feel tomorrow.",
+        "Start where you are. Use what you have. Do what you can.",
+        "You didn’t come this far to only come this far.",
+        "It always seems impossible until it’s done.",
+        "Fall seven times, stand up eight.",
+        "Keep your eyes on the stars and your feet on the ground.",
+        "You don’t have to be great to start, but you have to start to be great.",
+        "Success is what happens after you survive all your failures.",
+        "Go the extra mile; it’s never crowded.",
+        "Opportunities don’t happen, you create them.",
+        "The future depends on what you do today.",
+        "Don’t quit. Suffer now and live the rest of your life as a champion.",
+        "Hustle until your haters ask if you’re hiring.",
+        "Be fearless in the pursuit of what sets your soul on fire."
+    };
 
 }
