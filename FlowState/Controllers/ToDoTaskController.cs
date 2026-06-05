@@ -76,6 +76,7 @@ namespace FlowState.Controllers
             if (userId == null) return Unauthorized();
 
             task.UserId = userId.Value; //this is maybe owner from the token not the body of the ToDoTask
+            task.StartDate = DateTime.Now; //serverowned, always now utc
             var createdTask = _taskService.AddTask(task);
 
             return CreatedAtAction(
@@ -98,6 +99,7 @@ namespace FlowState.Controllers
             //Justification
             //This line is required becuase if this did not exist it would maybe overwrite the edit body 
             updatedTask.UserId = existing.UserId;
+            updatedTask.StartDate = existing.StartDate;
 
             var task = _taskService.UpdateTask(id, updatedTask);
 
