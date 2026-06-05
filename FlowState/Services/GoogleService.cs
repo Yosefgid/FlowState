@@ -29,9 +29,14 @@ namespace FlowState.Services
 
         public async Task<List<ToDoTask>> ImportGoogleCalendarEventsAsync(string userId)
         {
+            if (!int.TryParse(userId, out var loggedInUserId))
+            {
+                throw new InvalidOperationException("Invalid logged-in user ID.");
+            }
+
             var googleEvents = await _googleCalendarClient.GetCalendarEventsAsync(userId);
 
-            var existingGoogleIds = _taskRepo.GetAllTasks()
+            var existingGoogleIds = _taskRepo.GetAllTasksByUser(loggedInUserId)
                 .Where(t => !string.IsNullOrWhiteSpace(t.GoogleId))
                 .Select(t => t.GoogleId)
                 .ToHashSet();
@@ -50,7 +55,7 @@ namespace FlowState.Services
                     continue;
                 }
 
-                var task = MapGoogleEventToTask(googleEvent);
+                var task = MapGoogleEventToTask(googleEvent, loggedInUserId);
 
                 _taskRepo.AddTask(task);
 
@@ -62,16 +67,25 @@ namespace FlowState.Services
             return importedTasks;
         }
 
-        public ToDoTask MapGoogleEventToTask(Event googleEvent)
+        public ToDoTask MapGoogleEventToTask(Event googleEvent, int userId)
         {
             var startDate = GetGoogleEventDateTime(googleEvent.Start);
             var endDate = GetGoogleEventDateTime(googleEvent.End);
 
-            return new ToDoTask(0,//TODO replace with relevant userId
+            var task = new ToDoTask(
+                userId,
                 googleEvent.Summary ?? "Untitled Google Event",
                 googleEvent.Description ?? "",
-                googleEvent.Id ?? ""              
-            ).setStartDate(startDate).setEndDate(endDate);
+                googleEvent.Id ?? ""
+            );
+
+            task.StartDate = startDate;
+            task.EndDate = endDate;
+
+            // 0 means this task is not assigned to a session
+            task.SessionId = 0;
+
+            return task;
         }
 
         private DateTime GetGoogleEventDateTime(EventDateTime eventDateTime)
@@ -103,7 +117,7 @@ namespace FlowState.Services
 
         Task<List<ToDoTask>> ImportGoogleCalendarEventsAsync(string userId);
 
-        ToDoTask MapGoogleEventToTask(Event googleEvent);
+        ToDoTask MapGoogleEventToTask(Event googleEvent, int userId);
 
         Task<bool> IsGoogleCalendarConnectedAsync(string userId);
     }

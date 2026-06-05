@@ -397,19 +397,32 @@
     {
         if (isGoogleConnected)
         {
-            await Http.PostAsync("api/google-tasks/import", null);
-            await LoadTasks();
+            var importResponse = await Http.PostAsync("api/google-tasks/import", null);
+
+            if (importResponse.IsSuccessStatusCode)
+            {
+                await LoadTasks();
+            }
+
             return;
         }
 
-        Navigation.NavigateTo("http://localhost:5170/api/google-tasks/connect", forceLoad: true);
+        var response = await Http.GetFromJsonAsync<GoogleAuthUrlResponse>(
+            "api/google-tasks/auth-url"
+        );
+
+        if (response is not null && !string.IsNullOrWhiteSpace(response.AuthUrl))
+        {
+            Navigation.NavigateTo(response.AuthUrl, forceLoad: true);
+        }
     }
 
     private void OpenTaskModal(ToDoTask task)
     {
-        selectedTask = new ToDoTask(0,//TODO replace with relevant user info
+        selectedTask = new ToDoTask(
+            task.UserId,
             task.Name,
-            task.Description,
+            task.Description ?? "",
             task.GoogleId ?? ""
         )
         {
@@ -419,7 +432,8 @@
             TimeSet = task.TimeSet,
             StartDate = task.StartDate,
             EndDate = task.EndDate,
-            Category = task.Category
+            Category = task.Category,
+            SessionId = task.SessionId
         };
     }
 
@@ -490,5 +504,10 @@
     private class GoogleStatusResponse
     {
         public bool IsConnected { get; set; }
+    }
+
+    private class GoogleAuthUrlResponse
+    {
+        public string AuthUrl { get; set; } = "";
     }
 }
