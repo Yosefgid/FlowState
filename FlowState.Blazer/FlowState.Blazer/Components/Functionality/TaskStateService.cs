@@ -21,13 +21,15 @@ namespace FlowState.Blazer.Components.Functionality
             Http = http;
             _tokenService = tokenService;
         }
-        public List<ToDoTask> Tasks { get; set; } = new() {
-            new ToDoTask(0,"Finish API", "Complete CRUD endpoints for ToDo API", "google-1").setEndDate(DateTime.Now),
-            new ToDoTask(0,"Study EF Core", "Review tracking, migrations, and relationships", "google-2").setEndDate(DateTime.Now),
-            new ToDoTask(0,"Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3").setEndDate(DateTime.Now),
-            new ToDoTask(0,"Frontend UI", "Build Blazor or React task UI", "google-4").setEndDate(DateTime.Now),
-            new ToDoTask(0,"Write Tests", "Add unit tests for service layer", "google-5").setEndDate(DateTime.Now)
-        };
+        //public List<ToDoTask> Tasks { get; set; } = new() {
+        //    new ToDoTask("Finish API", "Complete CRUD endpoints for ToDo API", "google-1").setEndDate(DateTime.Now),
+        //    new ToDoTask("Study EF Core", "Review tracking, migrations, and relationships", "google-2").setEndDate(DateTime.Now),
+        //    new ToDoTask("Fix Toggle Bug", "Debug why IsCompleted is not persisting", "google-3").setEndDate(DateTime.Now),
+        //    new ToDoTask("Frontend UI", "Build Blazor or React task UI", "google-4").setEndDate(DateTime.Now),
+        //    new ToDoTask("Write Tests", "Add unit tests for service layer", "google-5").setEndDate(DateTime.Now)
+        //};
+
+        public List<ToDoTask> Tasks { get; set; } = new();
 
         public List<Session> Sessions { get; set; } = new()
         {
@@ -147,7 +149,8 @@ namespace FlowState.Blazer.Components.Functionality
 
         public void OrderTasksByName()
         {
-            Tasks = Tasks.OrderBy(x => x.Name).ToList();
+            //Tasks = Tasks.OrderBy(x => x.Name).ToList();
+            Tasks.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
         }
 
         public async Task OnCheckedChanged(ToDoTask Todo, bool isChecked , EventCallback<bool> StatusChanged)

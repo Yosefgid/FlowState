@@ -1,0 +1,233 @@
+﻿@page "/profile"
+@rendermode InteractiveServer
+@layout MainLayout
+@using FlowState.Blazer.Models
+@using FlowState.Blazer.Services
+@inject UserService UserService
+@inject AuthStateServ AuthState
+@inject NavigationManager Nav
+
+<div class="container" style="max-width: 600px;">
+    <h3 class="mb-4">My Profile</h3>
+    @if (_loading)
+    {
+        <p>Loading...</p>
+    } else if(_profile is null)
+    {
+        <div class="alert alert-danger">Could not load your profile. Try logging in again</div>
+    }
+    else
+    {
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <div class="alert @(_isError? "alert-danger": "alert-success")">
+                @_message
+            </div>
+        }
+            <div class="card mb=4 shadow-sm">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center avatar-initials" style="width:64px;fonr-size: 1.5rem;">
+                        @GetInitials()
+                    </div>
+                    <h4 class="card-title">@_profile!.Username</h4>
+                    <p class="mb-1 text-muted"><small>Member since: @_profile.CreatedAt.ToString("d MMM yyyy")</small></p>
+
+                </div>
+            </div>
+            <div class="card mb-4 shadow-sm profile-card">
+                @if (!_editingUsername)
+                { 
+                    <div class="card-body" style="cursor:pointer" @onclick="()=>_editingUsername =true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Username</h5>
+                                <p class="mb-0 text-muted">@_profile.Username</p>
+                            </div>
+                        <span class="text-primary fs-4"><i class="bi bi-chevron-double-right"></i></span>
+
+                        </div>
+
+                </div>
+
+                }
+                else
+                {
+                    <div class="card-body">
+                        <h5 class="mb-3">Change Username</h5>
+                        <input class="form-control mb-3" @bind="_newUsername" />
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" @onclick="SaveUsername" disabled="@_busy">Save</button>
+                            <button class="btn btn-outline-secondary" @onclick="CancelUsernameEdit" disabled="@_busy">Cancel</button>
+                        </div>
+
+                    </div>
+                
+                }
+            </div>
+            <div class="card mb-4 shadow-sm profile-card">
+                @if (!_editingEmail)
+                {
+                    <div class="card-body" style="cursor:pointer" @onclick="() => _editingEmail = true">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">Email</h5>
+                                <p class="mb-0 text-muted">@_profile.Email</p>
+                            </div>
+                            <span class="text-primary fs-4"><i class="bi bi-chevron-double-right"></i></span>
+
+                        </div>
+
+                    </div>
+
+                }
+                else
+                {
+                    <div class="card-body">
+                        <h5 class="mb-3">Change Email</h5>
+                        <input class="form-control mb-3" @bind="_newEmail" />
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary" @onclick="SaveEmail" disabled="@_busy">Save</button>
+                            <button class="btn btn-outline-secondary" @onclick="CancelEmailEdit" disabled="@_busy">Cancel</button>
+                        </div>
+
+                    </div>
+
+                }
+            </div>
+           <div class="card-link border-danger">
+               <div class="card-body">
+                   <h5 class="text-danger">Delete Account </h5>
+                   <p class="text-muted">Permanently delete your account and all associated data.</p>
+                @if (!_confirmingDelete)
+                {
+                    <button class="btn btn-outline-danger" @onclick="() => _confirmingDelete = true" disabled="@_busy">Delete My Account!</button>
+                } else
+                {
+                    <div class="alert alert-danger">We are sad to see you go 😔! Are you sure?</div>
+                    <button class="btn btn-secondary" @onclick="() => _confirmingDelete = false" disabled="@_busy">Cancel 😊</button>
+                }
+            </div>
+
+           </div>
+        
+    }
+
+
+
+</div>
+
+@code {
+    UserProfile? _profile;
+    bool _loading = true;
+    private bool _busy;
+    string _newEmail = string.Empty;
+    private string _newUsername = string.Empty;
+    private string? _message;
+    private bool _isError;
+    private bool _confirmingDelete;
+    private bool _editingUsername;
+    private bool _editingEmail;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        await LoadProfile();
+
+    }
+    private async Task LoadProfile()
+    {
+        _loading = true;
+        StateHasChanged();
+        _profile = await UserService.GetMyProfileAsync();
+        if(_profile is not null)
+        {
+            _newEmail = _profile.Email;
+            _newUsername = _profile.Username;
+
+        }
+        _loading = false;
+        StateHasChanged();
+    }
+    private async Task ChangeEmail()
+    {
+        _busy = true;
+        _message = null;
+        var (success, error) = await UserService.UpdateEmailAsync(_newEmail);
+        if (success)
+        {
+            AuthState.SetUser(_profile!.Username, _newEmail);
+            Show("Email updated.", false);
+            await LoadProfile();
+        }
+        else Show(error ?? "Could not update email.", true);
+        _busy = false;
+        StateHasChanged();
+
+    }
+    private async Task ChangeUsername()
+    {
+        _busy = true;
+        _message = null;
+        var (success, error) = await UserService.ChangeUsernameAsync(_newUsername);
+        if (success)
+        {
+            AuthState.SetUser(_newUsername, _profile!.Email);
+            Show("Username updated.", false);
+            await LoadProfile();
+        }
+        else Show(error ?? "Could not update username, username may already be taken.", true);
+        _busy = false;
+        StateHasChanged();
+
+    }
+    private async Task DeleteAccount()
+    {
+        _busy = true;
+        _message = null;
+        var (success, error) = await UserService.DeleteAccountAsync();
+        if (success)
+        {
+            await AuthState.LogoutAsync();
+            Nav.NavigateTo("/register", forceLoad: true);
+            return;
+        }
+        Show(error ?? "Could not Delete Account...", true);
+        _busy = false;
+        _confirmingDelete = false;
+        StateHasChanged();
+
+    }
+
+    private void Show(string msg, bool isError){ _message = msg; _isError = isError; }
+
+    private async Task SaveUsername()
+    {
+        await ChangeUsername();
+        if (!_isError) _editingUsername = false;
+
+    }
+    private async Task SaveEmail()
+    {
+        await ChangeEmail();
+        if (!_isError) _editingEmail = false;
+
+    }
+
+    private void CancelUsernameEdit()
+    {
+        _newUsername = _profile?.Username??string.Empty;
+        _editingUsername = false;
+    }
+    private void CancelEmailEdit()
+    {
+        _newEmail = _profile?.Email ?? string.Empty;
+        _editingEmail = false;
+    }
+    private string GetInitials()
+    {
+        if (string.IsNullOrEmpty(_profile?.Username)) return "?";
+        var parts = _profile.Username.Split(' ');
+        return parts.Length >= 2
+            ? $"{parts[0][0]}{parts[1][0]}".ToUpper()
+            : _profile.Username[0].ToString().ToUpper();
+    }
+}

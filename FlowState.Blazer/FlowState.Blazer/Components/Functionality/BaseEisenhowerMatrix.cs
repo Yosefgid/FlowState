@@ -1,6 +1,8 @@
 using Blazorise;
+using FlowState.Blazer.Services;
 using FlowState.Models;
 using Microsoft.AspNetCore.Components;
+using System.Net.Http.Headers;
 
 namespace FlowState.Blazer.Components.Functionality
 {  
@@ -15,6 +17,7 @@ namespace FlowState.Blazer.Components.Functionality
 
         [Inject]
         protected TaskStateService TaskState { get; set; } = default!;
+        [Inject] protected TokenService TokenService { get; set; } = default!;
 
         [Inject]
         protected HttpClient Http { get; set; } = default!;
@@ -60,10 +63,20 @@ namespace FlowState.Blazer.Components.Functionality
 
         public async Task ItemDropped(DraggableDroppedEventArgs<ToDoTask> dropItem)
         {
-            dropItem.Item.Category = TaskState.StringToEisen[dropItem.DropZoneName];
+            /*dropItem.Item.Category = TaskState.StringToEisen[dropItem.DropZoneName];
             TaskState.OrderTasksByName();
 
-            await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
+            await Http.PatchAsJsonAsync($"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);*/
+            dropItem.Item.Category = TaskState.StringToEisen[dropItem.DropZoneName];
+
+            var response = await Http.PatchAsJsonAsync(
+                $"/api/tasks/assign-eisen/{dropItem.Item.Id}", dropItem.Item.Category);
+
+            if (!response.IsSuccessStatusCode)
+                Console.WriteLine($"[ItemDropped] assign-eisen failed: {response.StatusCode}");
+
+            TaskState.OrderTasksByName();
+            await InvokeAsync(StateHasChanged);
         }
 
         // ── Task toggle ──────────────────────────────────────────────────────────
