@@ -79,7 +79,7 @@ namespace FlowState.Controllers
 
             _sessionService.CreateSessionInvite(invite);
 
-            return Ok($"https://localhost:5171/invite/{invite.Token}");
+            return Ok($"https://localhost:5271/invite/{invite.Token}");
         }
 
         [HttpPost("invite/{token}/accept")]
